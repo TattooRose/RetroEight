@@ -1,0 +1,4 @@
+## Compiled source #
+Xex/*.lst
+Xex/*.lab
+Xex/*.atdbg
