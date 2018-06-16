@@ -49,9 +49,10 @@ HudMemoryAddress			= $06B0				; Heads up display are
 
 DataAddress					= $2000				;  4K (size for data)
 SoundPlayerAddress			= $3400
-SoundDataAddress			= $4000
 
 CodeAddress					= $4400				; 23K zone for code
+
+SoundDataAddress			= $4000
 
 PmgAddress					= $A000				;  2K (2K size for PMG)
 GameFontAddress				= $A800				; 42K (1K size for FNT)
@@ -138,22 +139,37 @@ No_Ntsc_Loop
 		beq No_Ntsc_Loop
 
 .endif
-
 		ClearSystem								; begin machine setup
 		DisableBasic							; disable to use memory
 
 		SetRamTop #32							; Set Ramtop
 		
 		jsr InitVars							; Initialize the variables
-		jsr InitAndLoadLevel					; Initialize and load the first level
+		jsr DoLoadLevel							; Initialize and load the first level
 					
 RetroLoop
 		
+		jsr PlayLevel							; play this level
 		jmp RetroLoop							; endless loop
+
+
+;
+;**************************************************************************************************
+; 	PlayLevel
+;**************************************************************************************************
+;
+.proc PlayLevel
+
+PlayerMethodReturn
+
+		jmp PlayerMethodReturn
+		
+		rts
+.endp
 		
 ;
 ;**************************************************************************************************
-; InitVars
+; 	InitVars
 ;**************************************************************************************************
 ;
 .proc InitVars
@@ -201,21 +217,23 @@ RetroLoop
 
 		rts
 	
-.endp			
-		
+.endp	
+
 ;
 ;**************************************************************************************************
-;	InitAndLoadLevel
+;	DoLoadLevel
 ;**************************************************************************************************
 ;
-.proc InitAndLoadLevel
+.proc DoLoadLevel
 
 		lda #<HudMemoryAddress					; set the text display address
 		sta m_hudMemoryAddress					; store the LSB
 		lda #>HudMemoryAddress					; set the text display address
 		sta m_hudMemoryAddress+1				; store the MSB
 
+		SetVerticalBlank Game_VBI, VBI_I		; set the vertical blank interrupt
 		SetDisplayListInterrupt GameDli_01		; set the display list interrupts
+
 		VcountWait 120
 				
 		lda #GameDLEnd							; length of games display list data
@@ -226,38 +244,38 @@ RetroLoop
 		
 		jsr LoadDisplayListData					; perform the DL data move
 
-		SetDisplayListAddress CommDspListAddr	; set the display list address	
-
-		SetFontAddress GameFontAddress			; set the starting font address
-
 ;*****	Housekeeping
 ;
 		jsr SfxInit
 		jsr InitVars							; begin initialization
-
+		jsr InitPlayer							; do player initialization
+		
 ;*****	Set the addresses
 ;
 SetAddresses
 
+		SetDisplayListAddress CommDspListAddr	; set the display list address	
+		SetFontAddress GameFontAddress			; set the starting font address
 		SetPMBaseAddress PmgAddress				; set the player missile address
 
 		VcountWait 120							; make sure to wait so the setting takes effect
 				
-		lda #<GameMemoryAddress
-		sta m_currentLineAddress		
-		lda #>GameMemoryAddress
-		sta m_currentLineAddress+1
+;*****	Load the level tables and the current level
+;	
+
+		lda #<GameMemoryAddress					; set the game memory address
+		sta m_currentLineAddress				; to the zero page area
+		lda #>GameMemoryAddress					; in order to load the LSB/MSB
+		sta m_currentLineAddress+1				; of the display addresses
 
 		jsr InitLevelTable						; set up the level table
 
-;*****	Load the starting level
-;	
 		lda m_currLevelNum						; grab the current level number
 		sta m_param00							; store it to the parameter
 
 		jsr LoadLevel							; load the level
 
-;*****	InitHardware
+;*****	Initialize the Hardware
 ;
 InitHardware
 
@@ -282,13 +300,11 @@ InitHardware
 		lda #0									; clear the hit register
 		sta HITCLR								; store it
 
-		SetVerticalBlankInterrupt Game_VBI, VBI_I
-
 		lda #[NMI_VBI + NMI_DLI]				; enable VBI's and DLI's	
 		sta NMIEN								; store it
 	    sta IRQEN
 	    
-		cli
+		cli										; enable interrupts
 
 		rts
 
@@ -304,11 +320,18 @@ Game_VBI
 		
 ;*****	Code Include Files
 ;		
-		icl "AudioManager.Asm"
-		icl "RmtPlayer.Asm"
-		icl "LevelLoader.Asm"
 		icl "DisplayListInterrupts.Asm"
-		icl "Utilities.Asm"
+		icl "Lib/AudioManager.Asm"
+		icl "Lib/AnimationsLogic.Asm"
+		icl "Lib/EnemyManager.Asm"
+		icl "Lib/FloatPlatform.Asm"
+		icl "Lib/JoyKeyAndCollision.Asm"
+		icl "Lib/LevelLoader.Asm"
+		icl "Lib/MissileSystem.Asm"
+		icl "Lib/PlayerMovement.Asm"
+		icl "Lib/PlayerStates.Asm"	
+		icl "Lib/RmtPlayer.Asm"
+		icl "Lib/Utilities.Asm"
 		icl "Lib/SysProcs.Asm"
 
 ;*****	Game Font Address

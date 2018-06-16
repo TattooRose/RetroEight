@@ -1,3 +1,47 @@
+MUSIC_MENU 					= 0
+MUSIC_GAME 					= $0B
+MUSIC_GAME_OVER 			= $0E
+MUSIC_DUMMY 				= $10
+
+SFX_DIAMOND 				= 1
+SFX_FIRE					= 4
+SFX_ALL_PICKED 				= 12
+SFX_DEATH 					= 3
+SFX_CONGRATULATIONS 		= 16
+SFX_JUMP 					= 4
+
+PSD_NONE					= 0					; player side direction
+PSD_RIGHT					= 1
+PSD_LEFT					= 2
+
+PS_STATIC					= 0					; player states
+PS_OVER_PLATFORM			= 1
+PS_JUMPING					= 2
+PS_FALLING					= 3
+PS_CLIMBING					= 4
+PS_IN_WATER					= 5
+PS_GRAVITY_TEST				= 6
+PS_LOSE						= 7
+
+CT_BLANK					= 0					; character types
+CT_BLOCK					= 1
+CT_COLLECTABLE				= 2
+CT_DANGER					= 3
+CT_LADDER					= 4
+CT_WATER					= 5
+CT_HEALTH					= 6
+CT_FLOATPLATFORMH			= 7
+CT_VLASER					= 8
+CT_FLOATPLATFORMV			= 9
+CT_HLASER					= 10
+
+TS_NOT_PRESSED				= 0					; trigger states
+TS_JUST_RELEASED			= 0
+TS_PRESSED					= 0
+TS_JUST_PRESSED				= 0
+
+ENEMY_SHOOT_DELTA_Y			= 32
+
 ;*****	Set these constants depending on TV system
 ; 
 .if PAL_VERSION = 0

@@ -516,12 +516,12 @@ ExitMarkCyclesIfConsol
 
 ;
 ;**************************************************************************************************
-; SetVerticalBlankInterrupt [word] [byte]
+; SetVerticalBlank [word] [byte]
 ;**************************************************************************************************
 ;
-.macro SetVerticalBlankInterrupt
+.macro SetVerticalBlank
 	.if :0 <> 2
-		.error "SetVerticalBlankInterrupt error"
+		.error "SetVerticalBlank error"
 	.else
 		LDY #<:1
 		LDX #>:1

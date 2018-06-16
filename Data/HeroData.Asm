@@ -1,4 +1,6 @@
-HERO_NUM_PMG	= 2
+HERO_WIDTH		= $08
+HERO_HEIGHT		= $1D
+HERO_NUM_PMG	= $02
 
 HeroCurrPos_X	.byte $00
 HeroCurrPos_Y	.byte $00
