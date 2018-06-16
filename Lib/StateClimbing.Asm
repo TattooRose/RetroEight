@@ -44,7 +44,7 @@ PMC_check_up
 		sta m_playerLevelBottomY_H2
 
 		; search for an empty space at the middle bottom point of the player
-		lda #[PLR_WIDTH/2 + 2]
+		lda #[PLR_WIDTH/2-2]
 		sta m_bottomPosOffsetX
 		lda #0
 		sta m_bottomPosOffsetY
@@ -97,7 +97,7 @@ PMC_check_down
 		sta m_playerLevelBottomY_H2
 
 		; special check for the top char of a ladder (that is a platform)
-		lda #[PLR_WIDTH/2 + 2]
+		lda #[PLR_WIDTH/2-2]
 		sta m_bottomPosOffsetX
 		lda #CHAR_PIXELS_Y
 		sta m_bottomPosOffsetY
@@ -109,7 +109,7 @@ PMC_check_down
 		beq PMC_exit
 
 		; search for a platform at the middle bottom point of the player
-		lda #[PLR_WIDTH/2 + 2]
+		lda #[PLR_WIDTH/2-2]
 		sta m_bottomPosOffsetX
 		lda #0
 		sta m_bottomPosOffsetY

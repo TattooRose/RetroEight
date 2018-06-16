@@ -10,10 +10,6 @@
 ;				
 ;***************************************************************************************************
 ;
-PLR_WIDTH			= HERO_WIDTH							; set size in pixels
-PLR_HEIGHT			= HERO_HEIGHT
-
-;
 ;**************************************************************************************************
 ; 	InitPlayer
 ; 		remember that we don't use any speed over 1 char per frame right now,
@@ -23,6 +19,9 @@ PLR_HEIGHT			= HERO_HEIGHT
 ;
 .proc InitPlayer
 
+		lda #$00								; init the PMG table index
+		sta m_pmgTableIndex						
+		
 .if PAL_VERSION = 0
 	
 		lda #3									; air vertical movement 240 pixels per second (at 60 fps only!)
@@ -109,7 +108,7 @@ PLR_HEIGHT			= HERO_HEIGHT
 		ldx #PLR_HEIGHT
 		stx m_playerSizeY
 		dex
-		stx m_playerSizeYMinusOne
+		stx m_playerSizeYMinusOne			
 	
 		jsr InitPlayerInfo
 		
@@ -137,12 +136,12 @@ PLR_HEIGHT			= HERO_HEIGHT
 		sta m_playerSideSpeed_H1
 		sta m_playerSideSpeed_L1
 		
-		; set uo spawn position
+		; set up spawn position
 		lda #PSD_LEFT	
 		sta m_lastPlayerSideDirection
 		sta m_lastPlayerShootDirection
 
-		; set uo spawn position
+		; set up spawn position
 		lda #PSD_RIGHT	
 		sta m_lastPlayerSideDirection
 		sta m_lastPlayerShootDirection
@@ -196,38 +195,44 @@ PLR_HEIGHT			= HERO_HEIGHT
 
 .endp	
 
+;;
+;;**************************************************************************************************
+;; SetAnimationIndex
+;;**************************************************************************************************
+;;
+;.proc SetAnimationIndex
 ;
-;**************************************************************************************************
-; SetAnimationIndex
-;**************************************************************************************************
-;
-.proc SetAnimationIndex
-
 ;CheckState
 ;		lda m_playerState
 ;		cmp #PS_OVER_PLATFORM
 ;		beq CheckWalking	
-;		cmp #PS_STATIC
-;		beq StandingIndex
-;		cmp #PS_JUMPING
-;		beq JumpFallIndex
-;		cmp #PS_FALLING
-;		beq JumpFallIndex		
-;		cmp #PS_CLIMBING
-;		beq ClimbingIndex		
-;		cmp #PS_IN_WATER
-;		beq StandingIndex		
-;		cmp #PS_LOSE
+;;		cmp #PS_STATIC
+;;		beq StandingIndex
+;;		cmp #PS_JUMPING
+;;		beq JumpFallIndex
+;;		cmp #PS_FALLING
+;;		beq JumpFallIndex		
+;;		cmp #PS_CLIMBING
+;;		beq ClimbingIndex		
+;;		cmp #PS_IN_WATER
+;;		beq StandingIndex		
+;;		cmp #PS_LOSE
 ;		jmp StandingIndex		
 ;		 
 ;CheckWalking
+;		; set the table index for the PMG Walking
+;		lda #$00
+;		sta m_pmgTableIndex
+;		
+;		; Check the state of the stick
 ;		lda m_stick0
 ;		and #[STICK_RIGHT | STICK_LEFT]
 ;		cmp #[STICK_RIGHT | STICK_LEFT]
 ;		bne ProcessFrame
+;		
 ;		jmp StandingIndex
 ;			
-;ProcessFrame		
+;ProcessFrame			
 ;		; Process frame 
 ;		lda m_animFrame
 ;		adc #$01
@@ -236,136 +241,68 @@ PLR_HEIGHT			= HERO_HEIGHT
 ;IsWalking
 ;		and #12
 ;		cmp #12
-;		bne check_one
+;		bne Check_One
 ;		jmp WalkingIndex1
-;		
-;check_one
+;	
+;Check_One
 ;		lda m_animFrame
 ;		and #8		
 ;		cmp #8
-;		bne check_two
+;		bne Check_Two
 ;		jmp StandingIndex
 ;		
-;check_two
+;Check_Two
 ;		lda m_animFrame
 ;		and #4
 ;		cmp #4
-;		bne check_three		
+;		bne Check_Three		
 ;		jmp WalkingIndex
 ;
-;check_three
+;Check_Three
 ;		jmp StandingIndex		
 ;
-;WalkingIndex
-;		
+;WalkingIndex		
 ;		lda #$03
 ;		jmp Return_Exit		
 ;
-;WalkingIndex1
-;		
+;WalkingIndex1		
 ;		lda #$06
 ;		jmp Return_Exit		
 ;
-;JumpFallIndex
-;		
-;		lda #$09
-;		jmp Return_Exit
-;		
-;ClimbingIndex		
-;		inc m_floatAnimClimb
-;		lda m_floatAnimClimb
-;		and #$10
-;		beq LeftClimb 
-;		
-;RightClimb		
-;		lda #$0C		
-;		jmp Return_Exit
-;		
-;LeftClimb
-;		lda #$0F		
-;		jmp Return_Exit				
-;		
+;;JumpFallIndex
+;;		
+;;		lda #$09
+;;		jmp Return_Exit
+;;		
+;;ClimbingIndex		
+;;		inc m_floatAnimClimb
+;;		lda m_floatAnimClimb
+;;		and #$10
+;;		beq LeftClimb 
+;;		
+;;RightClimb		
+;;		lda #$0C		
+;;		jmp Return_Exit
+;;		
+;;LeftClimb
+;;		lda #$0F		
+;;		jmp Return_Exit				
+;;		
 ;StandingIndex
 ;		lda #0	
 ;				
 ;Return_Exit
-;		sta m_animIndex
-;		tax	
-;		lda TabAnimationMap,x
-;		sta m_animOffset
-;		lda TabAnimationMap+1,x
-;		sta m_animHeight
-				
-		rts		
-.endp
-;
-;**************************************************************************************************
-; FlipPlayer
-;**************************************************************************************************
-;
-.proc FlipPlayer
-	
 ;		pha
-;		txa
-;		pha
-;		tya
-;		pha	
-;			
-;		lda TabAnimationMap[0]+2,x	
-;		cmp m_lastplayerSideDirection
-;		beq FlipExit
-;
-;		lda TabAnimationMap[0],x
-;		sta m_revOffset
+;		ldx m_animHeight		
+;		pla
+;		MultiplyAX
+;		
+;		ldy _productLo
+;		sty m_animIndex 
 ;				
-;		lda TabAnimationMap[0]+1,x
-;		sta m_revHeight
-;		
-;		lda m_lastPlayerSideDirection
-;		sta TabAnimationMap[0]+2,x		
-;		
-;		ldy #0
-;		ldx m_revOffset				
-;Flip	lda TabPlayerShape_01,x
-;		jsr ReverseSprite 
-;		sta TabPlayerShape_01,x
-;		
-;		lda TabPlayerShape_01A,x
-;		jsr ReverseSprite 
-;		sta TabPlayerShape_01A,x
-;		
-;		lda TabPlayerShape_01B,x
-;		jsr ReverseSprite 
-;		sta TabPlayerShape_01B,x
-;		inx
-;		iny
-;		cpy m_revHeight
-;		bne Flip
-;		
-;FlipExit
-;		pla
-;		tay
-;		pla
-;		tax
-;		pla
-		rts
-.endp
-;
-;**************************************************************************************************
-; ReverseSprite
-;**************************************************************************************************
-;
-.proc ReverseSprite
-		sta m_hldA
-		sty m_hldY
-	 	ldy #$07 
-loop1   asl m_hldA
-        ror 
-        dey 
-        bpl loop1        
-        ldy m_hldY
-        rts
-.endp         	
+;		rts		
+;.endp
+
 ;
 ;**************************************************************************************************
 ; SetPlayerInfo
@@ -429,40 +366,202 @@ loop1   asl m_hldA
 		rts
 
 .endp		
-;
-;**************************************************************************************************
-; DrawPlayer
-;**************************************************************************************************
-;
-.proc DrawPlayer
 
-;		lda m_playerBaseColor00
-;		sta COLPM0
-;		lda m_playerBaseColor1A
-;		sta COLPM1
-;		lda m_playerBaseColor1B
-;		sta COLPM2
+;;
+;;**************************************************************************************************
+;; 	DrawPlayer
+;;**************************************************************************************************
+;;
+;.proc DrawPlayer
 ;
-;		lda m_redrawPlayerCounter
-;		bne zdraw		
-;		jmp DP_exit				
+;;		lda m_redrawPlayerCounter
+;;		bne zdraw		
+;;		jmp DP_exit				
 ;
 ;zdraw
-;		lda #0
-;		sta m_redrawPlayerCounter
-;		
-;		jsr SetAnimationIndex
 ;
 ;		lda #0
-;		ldx #0
-;		ldy m_oldPlayerScreenTopY	
+;		sta m_redrawPlayerCounter
+;				
+;		jsr SetAnimationIndex
+;
+;		ldx m_pmgTableIndex
+;		
+;.if PLR_NUM_PMG = $04
+;
+;		lda TabAnimLSB,x
+;		sta m_paramW01		
+;		lda TabAnimMSB, x
+;		sta m_paramW01+1
+;		
+;		lda TabAnimLSB+1,x
+;		sta m_paramW02		
+;		lda TabAnimMSB+1,x
+;		sta m_paramW02+1
+;
+;		lda TabAnimLSB+2,x
+;		sta m_paramW03		
+;		lda TabAnimMSB+2,x
+;		sta m_paramW03+1
+;
+;		lda TabAnimLSB+3,x
+;		sta m_paramW04		
+;		lda TabAnimMSB+3,x
+;		sta m_paramW04+1
+;		
+;		lda TabColorsLSB,x
+;		sta TabColor00+1
+;		lda TabColorsMSB,x
+;		sta TabColor00+2
+;
+;		lda TabColorsLSB+1,x
+;		sta TabColor01+1
+;		lda TabColorsMSB+1,x
+;		sta TabColor01+2
+;
+;		lda TabColorsLSB+2,x
+;		sta TabColor02+1
+;		lda TabColorsMSB+2,x
+;		sta TabColor02+2
+;
+;		lda TabColorsLSB+3,x
+;		sta TabColor03+1
+;		lda TabColorsMSB+3,x
+;		sta TabColor03+3
+;						
+;.elseif PLR_NUM_PMG = $03
+;		
+;		lda TabAnimLSB,x
+;		sta m_paramW01		
+;		lda TabAnimMSB, x
+;		sta m_paramW01+1
+;		
+;		lda TabAnimLSB+1,x
+;		sta m_paramW02+1 		
+;		lda TabAnimMSB+1,x
+;		sta m_paramW02+2
+;
+;		lda TabAnimLSB+2,x
+;		sta m_paramW03	
+;		lda TabAnimMSB+2,x
+;		sta m_paramW03+1
+;		
+;		lda TabColorsLSB,x
+;		sta TabColor00+1
+;		lda TabColorsMSB,x
+;		sta TabColor00+2
+;
+;		lda TabColorsLSB+1,x
+;		sta TabColor01+1
+;		lda TabColorsMSB+1,x
+;		sta TabColor01+2
+;
+;		lda TabColorsLSB+2,x
+;		sta TabColor02+1
+;		lda TabColorsMSB+2,x
+;		sta TabColor02+2
+;
+;.elseif PLR_NUM_PMG = $02
+;
+;		lda TabAnimLSB,x
+;		sta m_paramW01		
+;		lda TabAnimMSB, x
+;		sta m_paramW01+1
+;		
+;		lda TabAnimLSB+1,x
+;		sta m_paramW02		
+;		lda TabAnimMSB+1,x
+;		sta m_paramW02+1
+;
+;		lda TabColorsLSB,x
+;		sta TabColor00+1
+;		lda TabColorsMSB,x
+;		sta TabColor00+2
+;
+;		lda TabColorsLSB+1,x
+;		sta TabColor01+1
+;		lda TabColorsMSB+1,x
+;		sta TabColor01+2
+;
+;.elseif PLR_NUM_PMG = $01
+;
+;		lda TabAnimLSB,x
+;		sta m_paramW01		
+;		lda TabAnimMSB, x
+;		sta m_paramW01+1
+;
+;		lda TabColorsLSB,x
+;		sta TabColor00+1
+;		lda TabColorsMSB,x
+;		sta TabColor00+2
+;
+;.endif
+;
+;		ldx m_animFrame
+;
+;		lda #PLR_NUM_PMG
+;		cmp #$01
+;		beq	TabColor00
+;		
+;		cmp #$02
+;		beq TabColor01
+;		
+;		cmp #$03
+;		beq TabColor02
+;		
+;TabColor03		
+;		lda $FFFF,x
+;		sta COLPM3
+;		
+;TabColor02		
+;		lda $FFFF,x
+;		sta COLPM2
+;
+;TabColor01		
+;		lda $FFFF,x
+;		sta COLPM1
+;
+;TabColor00		
+;		lda $FFFF,x
+;		sta COLPM0		
+;
+;		lda #$00
+;		ldx #$00
+;		ldy m_oldPlayerScreenTopY
 ;zfill	
-;		sta p0_area_1,y
+;		txa
+;		pha		
+;		ldx #PLR_NUM_PMG	
+;		
+;		cpx #$01
+;		beq Clear00
+;		
+;		cpx #$02
+;		beq Clear01
+;		
+;		cpx #$03
+;		beq Clear02
+;		
+;Clear03		
+;		lda #$00
+;		sta p3_area_1,y
+;Clear02		
+;		lda #$00
+;		sta p2_area_1,y		
+;Clear01		
+;		lda #$00
 ;		sta p1_area_1,y
-;		sta p2_area_1,y
+;Clear00		
+;		lda #$00
+;		sta p0_area_1,y
+;
 ;		iny
+;		
+;		pla		
+;		tax
 ;		inx
-;		cpx m_revHeight
+;
+;		cpx m_animHeight
 ;		bne zfill
 ;
 ;		ldx m_animIndex
@@ -470,28 +569,30 @@ loop1   asl m_hldA
 ;
 ;		lda #$00
 ;		sta m_animCount
+;		
 ;		ldx m_animOffset
 ;		ldy m_playerScreenTopY	
 ;fill01
-;		lda TabPlayerShape_01,x
-;		sta p0_area_1,y		
+;;		lda TabPlayerShape_01,x
+;;		sta p0_area_1,y		
 ;		
-;		lda TabPlayerShape_01A,x
-;		sta p1_area_1,y
-;		
-;		lda TabPlayerShape_01B,x
-;		sta p2_area_1,y
-;		
-;		iny
-;		inx
-;		inc m_animCount
-;		lda m_animCount
-;		cmp m_animHeight
-;		bcc fill01
-;
-DP_exit
-		rts
-.endp		
+;;		lda TabPlayerShape_01A,x
+;;		sta p1_area_1,y
+;;		
+;;		lda TabPlayerShape_01B,x
+;;		sta p2_area_1,y
+;;		
+;;		iny
+;;		inx
+;;		inc m_animCount
+;;		lda m_animCount
+;;		cmp m_animHeight
+;;		bcc fill01
+;;
+;DP_exit
+;		rts
+;.endp
+		
 ;
 ;**************************************************************************************************
 ; DrawPlayerExplosion

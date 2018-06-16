@@ -66,6 +66,7 @@ PMGT_snap_ladder_up
 		sta m_playerLevelLeftX_L1
 		sta m_playerLevelLeftX_H2
 
+		clc
 		lda m_middleBottomCharPosX
 		asl
 		rol m_playerLevelLeftX_H2				; x2

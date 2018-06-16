@@ -47,6 +47,19 @@ m_oldTrigger0				.byte $00
 m_triggerState				.byte $00			; 0 - not pressed, 1 - just released, 2 - just pressed, 3 - pressed
 m_currentTrigger0			.byte $00
 
+m_playerScreenLeftX			.byte $00
+m_playerScreenTopY			.byte $00
+
+m_oldPlayerScreenLeftX		.byte $00
+m_oldPlayerScreenTopY		.byte $00
+
+m_playerSizeX				.byte $00
+m_playerSizeY				.byte $00
+
+m_playerSizeXMinusOne		.byte $00
+m_playerSizeYMinusOne		.byte $00
+
+
 TabLevelLineAddressLSB		:256 .byte $00
 TabLevelLineAddressMSB		:256 .byte $00
 
@@ -152,9 +165,7 @@ m_revIndex						.byte $00
 m_revHeight						.byte $00
 m_revOffset						.byte $00
 m_animCount						.byte $00
-m_animFrame						.byte $00
 m_animIndex        				.byte $00
-m_animHeight					.byte $00
 m_animOffset					.byte $00	
 
 m_leftTopChar					.byte $00
@@ -174,10 +185,10 @@ m_playerExplosionScreenTopY_L1	.byte $00
 
 m_debugSaveX					.byte 0
 
-m_missleBaseColor00				.byte $00
-m_playerBaseColor00				.byte $00
-m_playerBaseColor1A				.byte $00
-m_playerBaseColor1B				.byte $00
+;m_missleBaseColor00				.byte $00
+;m_playerBaseColor00				.byte $00
+;m_playerBaseColor1A				.byte $00
+;m_playerBaseColor1B				.byte $00
 
 ;
 ;**************************************************************************************************

@@ -37,6 +37,7 @@
 ;
 ;***** Include Library Files
 ;
+
 		icl "Lib/AtariEquates.Asm"				; Atari hardware DOS,OS,ANTIC,GITA,POKEY,PIA equates
 		icl "Lib/SysMacros.Asm"					; General purpose macros used by system
 
@@ -63,6 +64,7 @@ GameMemoryAddress			= $B000				; 44K (4K size for Screen)
 ;*****	Zero Page Members
 ;
 		org ZeroPageAddress		
+		
 		icl "ZeroPage.Asm"
 		icl "Constants.Asm"
 
@@ -82,7 +84,7 @@ CHAR_PIXELS_Y				= 8
 PM_BASE_SCREEN_X			= 48
 PM_BASE_SCREEN_Y			= 32
 
-LEVEL_CHAR_SIZE_X			= 42				; max level size now should be 256 x 255 lines	
+LEVEL_CHAR_SIZE_X			= 42				
 LEVEL_CHAR_SIZE_Y			= 24
 
 WINDOW_CHAR_SIZE_X			= 40
@@ -96,6 +98,7 @@ WINDOW_CHAR_SIZE_Y			= 24
 		icl "Data/DisplayListData.Asm"
 		icl "Data/Levels.Asm"
 		icl "RetroData.Asm"
+		icl "DrawPlayer.Asm"
 
 ;*****	Data and Code area check
 ;
@@ -152,7 +155,6 @@ RetroLoop
 		jsr PlayLevel							; play this level
 		jmp RetroLoop							; endless loop
 
-
 ;
 ;**************************************************************************************************
 ; 	PlayLevel
@@ -160,9 +162,17 @@ RetroLoop
 ;
 .proc PlayLevel
 
+PlayLoop		
+		jsr CheckInput
+		jsr UpdateTimers
+		jmp (m_playerMethodPointer)
+	
 PlayerMethodReturn
+		jsr SetPlayerScreenPos
+		jsr DrawPlayer
 
-		jmp PlayerMethodReturn
+		VcountWait 120
+		jmp PlayLoop
 		
 		rts
 .endp
@@ -248,7 +258,7 @@ PlayerMethodReturn
 ;
 		jsr SfxInit
 		jsr InitVars							; begin initialization
-		jsr InitPlayer							; do player initialization
+		jsr InitPlayer							; do player initialization		
 		
 ;*****	Set the addresses
 ;
@@ -268,12 +278,17 @@ SetAddresses
 		lda #>GameMemoryAddress					; in order to load the LSB/MSB
 		sta m_currentLineAddress+1				; of the display addresses
 
+		jsr InitDraw							; set up the drawing members
 		jsr InitLevelTable						; set up the level table
 
 		lda m_currLevelNum						; grab the current level number
 		sta m_param00							; store it to the parameter
 
 		jsr LoadLevel							; load the level
+
+		lda m_currLevelNum						; grab the current level number
+		sta m_param00							; store it to the parameter
+		jsr SetSpawnPos
 
 ;*****	Initialize the Hardware
 ;
@@ -310,17 +325,57 @@ InitHardware
 
 .endp
 	
+;
+;**************************************************************************************************
+;	DebugInfo
+;**************************************************************************************************
+;
+.proc DebugInfo
+
+.if DEBUG_ON = 1
+
+		lda m_playerState		
+		ldy #40
+		jsr DisplayDebugInfoHexFF
+
+		lda m_lastPlayerSideDirection		
+		ldy #43
+		jsr DisplayDebugInfoHexFF
+					
+		lda _animationTableIndex
+		ldy #46
+		jsr DisplayDebugInfoHexFF
+		
+		lda _animationTableFrame
+		ldy #49
+		jsr DisplayDebugInfoHexFF
+		
+		lda _animationOffset
+		ldy #52
+		jsr DisplayDebugInfoHexFF
+		
+		lda _animationFrame
+		ldy #55
+		jsr DisplayDebugInfoHexFF
+		
+.endif
+		
+		rts
+.endp
 		
 ;*****	Game Vertical Blank Routine
 ;		
 Game_VBI
+		
 		jsr SfxUpdate							; update music and sound effects
 		jsr UpdateInfoLine						; update the games HUD information
+		jsr DebugInfo
 		jmp XITVBL								; end vbi		
 		
 ;*****	Code Include Files
 ;		
 		icl "DisplayListInterrupts.Asm"
+		
 		icl "Lib/AudioManager.Asm"
 		icl "Lib/AnimationsLogic.Asm"
 		icl "Lib/EnemyManager.Asm"

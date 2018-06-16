@@ -45,6 +45,8 @@ m_saveRegY					org *+$01
 m_animMiscWidth				org *+$01
 m_animMiscHeight			org *+$01
 
+m_pmgTableIndex				org *+$01			; Player
+
 m_redrawPlayerCounter		org *+$01
 
 m_playerLevelLeftX_H2		org *+$01			; left side coordinate
@@ -62,18 +64,6 @@ m_playerLevelTopY_L1		org *+$01
 m_playerLevelBottomY_H2		org *+$01			; bottom line coordinate
 m_playerLevelBottomY_H1		org *+$01
 m_playerLevelBottomY_L1		org *+$01
-
-m_playerScreenLeftX			org *+$01
-m_playerScreenTopY			org *+$01
-
-m_oldPlayerScreenLeftX		org *+$01
-m_oldPlayerScreenTopY		org *+$01
-
-m_playerSizeX				org *+$01
-m_playerSizeY				org *+$01
-
-m_playerSizeXMinusOne		org *+$01
-m_playerSizeYMinusOne		org *+$01
 
 m_playerSideSpeed_H1		org *+$01
 m_playerSideSpeed_L1		org *+$01
@@ -111,7 +101,10 @@ m_playerMoveWaterSpeedY_L1	org *+$01
 m_playerNoJumpTimer			org *+$01			; for now this is used to disable the jump for some frames, after entering the water
 m_playerHoldJumpCounter		org *+$01
 
+m_playerSideDirection		org *+$01			; 0 - none, 1 - right, 2 - left
 m_lastPlayerSideDirection	org *+$01			; 0 - none, 1 - right, 2 - left
+
+m_playerShootDirection		org *+$01
 m_lastPlayerShootDirection	org *+$01
 
 m_playerOverPlatformFlag	org *+$01			; is player over platform
@@ -119,6 +112,7 @@ m_playerTopCollisionFlag	org *+$01			; did player hit top
 m_playerSideCollisionFlag	org *+$01			; did player hit side
 
 m_playerState				org *+$01			; 0-static, 1-over platform, 2-jumping up, 3-falling, 4-climbing, 5-in water, 6-gravity test
+m_oldPlayerState			org *+$01			; 0-static, 1-over platform, 2-jumping up, 3-falling, 4-climbing, 5-in water, 6-gravity test
 
 m_pageZeroTempValue			org *+$01
 
@@ -141,6 +135,8 @@ m_paramW01					org *+$02
 m_paramW02					org *+$02
 m_paramW03					org *+$02
 m_paramW04					org *+$02
+m_paramW05					org *+$02
+m_paramW06					org *+$02
 
 m_ptrLevelLine				org *+$02
 m_pageZeroTempPointer		org *+$02

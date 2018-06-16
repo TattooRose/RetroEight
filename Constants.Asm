@@ -56,11 +56,11 @@ ENEMY_SHOOT_DELTA_Y			= 32
 	SIDE_SPEED_LAND_L1		= 1 ;64
 	
 	SIDE_ACCEL_LAND_H1		= 0					; 6 frames (at 60 fps only!) or 0.x seconds, to reach max speed
-	SIDE_ACCEL_LAND_L1		= 32
+	SIDE_ACCEL_LAND_L1		= 16
 	
 	SIDE_DEACCEL_LAND_H1	= 0					; 3 frames (at 60 fps only!) or 0.x seconds, to reach zero speed
-	SIDE_DEACCEL_LAND_L1	= 128
-
+	SIDE_DEACCEL_LAND_L1	= 32
+	
 	SIDE_SPEED_WATER_H1		= 0
 	SIDE_SPEED_WATER_L1		= 128
 

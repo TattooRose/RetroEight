@@ -58,15 +58,6 @@ SetPlayerMethod
 	lda TabPlayerMethodMSB,x
 	sta m_playerMethodPointer+1
 
-	lda #$8A
-	sta m_playerBaseColor00	
-	
-	lda #$3A
-	sta m_playerBaseColor1A
-		
-	lda #$0F
-	sta m_playerBaseColor1B
-		
 	lda TabPlayerMethodInitLSB,x
 	sta m_pageZeroTempPointer
 	
