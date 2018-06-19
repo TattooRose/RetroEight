@@ -77,39 +77,39 @@ TabDrawMissileMethodLSB		.byte <DrawMissileM0, <DrawMissileM1, <DrawMissileM2, <
 
 TabDrawMissileMethodMSB		.byte >DrawMissileM0, >DrawMissileM1, >DrawMissileM2, >DrawMissileM3
 
-m_currentVirtualMissiles 	.byte 0
+TabMissileScreenLeftX		:MAX_VIRTUAL_MISSILES .byte $00
 
-TabMissileScreenLeftX		:MAX_VIRTUAL_MISSILES .byte 0
+TabMissileScreenTopY		:MAX_VIRTUAL_MISSILES .byte $00
 
-TabMissileScreenTopY		:MAX_VIRTUAL_MISSILES .byte 0
+TabOldMissileScreenLeftX	:MAX_VIRTUAL_MISSILES .byte $00
 
-TabOldMissileScreenLeftX	:MAX_VIRTUAL_MISSILES .byte 0
+TabOldMissileScreenTopY		:MAX_VIRTUAL_MISSILES .byte $00
 
-TabOldMissileScreenTopY		:MAX_VIRTUAL_MISSILES .byte 0
+TabMissileLevelLeftX_H2		:MAX_VIRTUAL_MISSILES .byte $00
 
-TabMissileLevelLeftX_H2		:MAX_VIRTUAL_MISSILES .byte 0
+TabMissileLevelLeftX_H1		:MAX_VIRTUAL_MISSILES .byte $00
 
-TabMissileLevelLeftX_H1		:MAX_VIRTUAL_MISSILES .byte 0
+TabMissileLevelLeftX_L1		:MAX_VIRTUAL_MISSILES .byte $00
 
-TabMissileLevelLeftX_L1		:MAX_VIRTUAL_MISSILES .byte 0
+TabMissileLevelTopY_H2		:MAX_VIRTUAL_MISSILES .byte $00
 
-TabMissileLevelTopY_H2		:MAX_VIRTUAL_MISSILES .byte 0
+TabMissileLevelTopY_H1		:MAX_VIRTUAL_MISSILES .byte $00
 
-TabMissileLevelTopY_H1		:MAX_VIRTUAL_MISSILES .byte 0
+TabMissileLevelTopY_L1		:MAX_VIRTUAL_MISSILES .byte $00
 
-TabMissileLevelTopY_L1		:MAX_VIRTUAL_MISSILES .byte 0
+TabMissileSpeedX_H1			:MAX_VIRTUAL_MISSILES .byte $00
 
-TabMissileSpeedX_H1			:MAX_VIRTUAL_MISSILES .byte 0
+TabMissileSpeedX_L1			:MAX_VIRTUAL_MISSILES .byte $00
 
-TabMissileSpeedX_L1			:MAX_VIRTUAL_MISSILES .byte 0
+TabMissileDirection			:MAX_VIRTUAL_MISSILES .byte $00
 
-TabMissileDirection			:MAX_VIRTUAL_MISSILES .byte 0
+TabMissileFrameCounter_H2	:MAX_VIRTUAL_MISSILES .byte $00
 
-TabMissileFrameCounter_H2	:MAX_VIRTUAL_MISSILES .byte 0
+TabMissileFrameCounter_H1	:MAX_VIRTUAL_MISSILES .byte $00
 
-TabMissileFrameCounter_H1	:MAX_VIRTUAL_MISSILES .byte 0
+TabMissileOwner				:MAX_VIRTUAL_MISSILES .byte $00
 
-TabMissileOwner				:MAX_VIRTUAL_MISSILES .byte 0
+m_currentVirtualMissiles 	.byte $00
 
 ;
 ;**************************************************************************************************
@@ -149,7 +149,9 @@ CCPM_shoot_right
 
 CCPM_init_position
 	
+		clc
 		lda m_playerLevelLeftX_H1
+		adc #[PLR_WIDTH/2]
 		sta TabMissileLevelLeftX_H1,x
 	
 		lda m_playerLevelLeftX_H2
@@ -499,6 +501,63 @@ UMS_exit
 
 .endp
 
+;
+;**************************************************************************************************
+; InitMissileSystem
+;	
+; 	Right now, the missile system is using a 1-on-1 relationship between
+; 	a virtual missile and a hardware missile, so we have a max of 4 virtual
+; 	missiles. If we want more virtual missiles we can only draw 4 every frame,
+; 	so some of them can lose hardware collisions and they are going to flicker
+;
+;**************************************************************************************************
+;
+.proc InitMissileSystem
+
+.if PAL_VERSION = 0
+		lda #[32+4]		; red color, change for pal
+.else
+		lda #[16+4]
+.endif
+		lda COLPF3
+		sta COLPM3
+		
+		lda #0
+		sta m_currentVirtualMissiles
+
+		ldx #0
+
+IMS_loop
+		sta TabMissileScreenLeftX,x
+		sta TabMissileScreenTopY,x
+		sta TabOldMissileScreenLeftX,x
+		sta TabOldMissileScreenTopY,x
+
+		sta TabMissileLevelLeftX_H2,x
+		sta TabMissileLevelLeftX_H1,x
+		sta TabMissileLevelLeftX_L1,x
+		sta TabMissileLevelTopY_H2,x
+		sta TabMissileLevelTopY_H1,x
+		sta TabMissileLevelTopY_L1,x
+
+		sta TabMissileSpeedX_H1,x
+		sta TabMissileSpeedX_L1,x
+
+		sta TabMissileDirection,x
+
+		sta TabMissileFrameCounter_H2,x
+		sta TabMissileFrameCounter_H1,x
+
+		sta TabMissileOwner,x
+
+		inx
+		cpx #MAX_VIRTUAL_MISSILES
+		bne IMS_loop
+
+		rts
+
+.endp	
+	
 ;
 ;**************************************************************************************************
 ;	SetMissileScreenPos

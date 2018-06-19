@@ -195,114 +195,6 @@
 
 .endp	
 
-;;
-;;**************************************************************************************************
-;; SetAnimationIndex
-;;**************************************************************************************************
-;;
-;.proc SetAnimationIndex
-;
-;CheckState
-;		lda m_playerState
-;		cmp #PS_OVER_PLATFORM
-;		beq CheckWalking	
-;;		cmp #PS_STATIC
-;;		beq StandingIndex
-;;		cmp #PS_JUMPING
-;;		beq JumpFallIndex
-;;		cmp #PS_FALLING
-;;		beq JumpFallIndex		
-;;		cmp #PS_CLIMBING
-;;		beq ClimbingIndex		
-;;		cmp #PS_IN_WATER
-;;		beq StandingIndex		
-;;		cmp #PS_LOSE
-;		jmp StandingIndex		
-;		 
-;CheckWalking
-;		; set the table index for the PMG Walking
-;		lda #$00
-;		sta m_pmgTableIndex
-;		
-;		; Check the state of the stick
-;		lda m_stick0
-;		and #[STICK_RIGHT | STICK_LEFT]
-;		cmp #[STICK_RIGHT | STICK_LEFT]
-;		bne ProcessFrame
-;		
-;		jmp StandingIndex
-;			
-;ProcessFrame			
-;		; Process frame 
-;		lda m_animFrame
-;		adc #$01
-;		sta m_animFrame
-;		
-;IsWalking
-;		and #12
-;		cmp #12
-;		bne Check_One
-;		jmp WalkingIndex1
-;	
-;Check_One
-;		lda m_animFrame
-;		and #8		
-;		cmp #8
-;		bne Check_Two
-;		jmp StandingIndex
-;		
-;Check_Two
-;		lda m_animFrame
-;		and #4
-;		cmp #4
-;		bne Check_Three		
-;		jmp WalkingIndex
-;
-;Check_Three
-;		jmp StandingIndex		
-;
-;WalkingIndex		
-;		lda #$03
-;		jmp Return_Exit		
-;
-;WalkingIndex1		
-;		lda #$06
-;		jmp Return_Exit		
-;
-;;JumpFallIndex
-;;		
-;;		lda #$09
-;;		jmp Return_Exit
-;;		
-;;ClimbingIndex		
-;;		inc m_floatAnimClimb
-;;		lda m_floatAnimClimb
-;;		and #$10
-;;		beq LeftClimb 
-;;		
-;;RightClimb		
-;;		lda #$0C		
-;;		jmp Return_Exit
-;;		
-;;LeftClimb
-;;		lda #$0F		
-;;		jmp Return_Exit				
-;;		
-;StandingIndex
-;		lda #0	
-;				
-;Return_Exit
-;		pha
-;		ldx m_animHeight		
-;		pla
-;		MultiplyAX
-;		
-;		ldy _productLo
-;		sty m_animIndex 
-;				
-;		rts		
-;.endp
-
 ;
 ;**************************************************************************************************
 ; SetPlayerInfo
@@ -367,345 +259,6 @@
 
 .endp		
 
-;;
-;;**************************************************************************************************
-;; 	DrawPlayer
-;;**************************************************************************************************
-;;
-;.proc DrawPlayer
-;
-;;		lda m_redrawPlayerCounter
-;;		bne zdraw		
-;;		jmp DP_exit				
-;
-;zdraw
-;
-;		lda #0
-;		sta m_redrawPlayerCounter
-;				
-;		jsr SetAnimationIndex
-;
-;		ldx m_pmgTableIndex
-;		
-;.if PLR_NUM_PMG = $04
-;
-;		lda TabAnimLSB,x
-;		sta m_paramW01		
-;		lda TabAnimMSB, x
-;		sta m_paramW01+1
-;		
-;		lda TabAnimLSB+1,x
-;		sta m_paramW02		
-;		lda TabAnimMSB+1,x
-;		sta m_paramW02+1
-;
-;		lda TabAnimLSB+2,x
-;		sta m_paramW03		
-;		lda TabAnimMSB+2,x
-;		sta m_paramW03+1
-;
-;		lda TabAnimLSB+3,x
-;		sta m_paramW04		
-;		lda TabAnimMSB+3,x
-;		sta m_paramW04+1
-;		
-;		lda TabColorsLSB,x
-;		sta TabColor00+1
-;		lda TabColorsMSB,x
-;		sta TabColor00+2
-;
-;		lda TabColorsLSB+1,x
-;		sta TabColor01+1
-;		lda TabColorsMSB+1,x
-;		sta TabColor01+2
-;
-;		lda TabColorsLSB+2,x
-;		sta TabColor02+1
-;		lda TabColorsMSB+2,x
-;		sta TabColor02+2
-;
-;		lda TabColorsLSB+3,x
-;		sta TabColor03+1
-;		lda TabColorsMSB+3,x
-;		sta TabColor03+3
-;						
-;.elseif PLR_NUM_PMG = $03
-;		
-;		lda TabAnimLSB,x
-;		sta m_paramW01		
-;		lda TabAnimMSB, x
-;		sta m_paramW01+1
-;		
-;		lda TabAnimLSB+1,x
-;		sta m_paramW02+1 		
-;		lda TabAnimMSB+1,x
-;		sta m_paramW02+2
-;
-;		lda TabAnimLSB+2,x
-;		sta m_paramW03	
-;		lda TabAnimMSB+2,x
-;		sta m_paramW03+1
-;		
-;		lda TabColorsLSB,x
-;		sta TabColor00+1
-;		lda TabColorsMSB,x
-;		sta TabColor00+2
-;
-;		lda TabColorsLSB+1,x
-;		sta TabColor01+1
-;		lda TabColorsMSB+1,x
-;		sta TabColor01+2
-;
-;		lda TabColorsLSB+2,x
-;		sta TabColor02+1
-;		lda TabColorsMSB+2,x
-;		sta TabColor02+2
-;
-;.elseif PLR_NUM_PMG = $02
-;
-;		lda TabAnimLSB,x
-;		sta m_paramW01		
-;		lda TabAnimMSB, x
-;		sta m_paramW01+1
-;		
-;		lda TabAnimLSB+1,x
-;		sta m_paramW02		
-;		lda TabAnimMSB+1,x
-;		sta m_paramW02+1
-;
-;		lda TabColorsLSB,x
-;		sta TabColor00+1
-;		lda TabColorsMSB,x
-;		sta TabColor00+2
-;
-;		lda TabColorsLSB+1,x
-;		sta TabColor01+1
-;		lda TabColorsMSB+1,x
-;		sta TabColor01+2
-;
-;.elseif PLR_NUM_PMG = $01
-;
-;		lda TabAnimLSB,x
-;		sta m_paramW01		
-;		lda TabAnimMSB, x
-;		sta m_paramW01+1
-;
-;		lda TabColorsLSB,x
-;		sta TabColor00+1
-;		lda TabColorsMSB,x
-;		sta TabColor00+2
-;
-;.endif
-;
-;		ldx m_animFrame
-;
-;		lda #PLR_NUM_PMG
-;		cmp #$01
-;		beq	TabColor00
-;		
-;		cmp #$02
-;		beq TabColor01
-;		
-;		cmp #$03
-;		beq TabColor02
-;		
-;TabColor03		
-;		lda $FFFF,x
-;		sta COLPM3
-;		
-;TabColor02		
-;		lda $FFFF,x
-;		sta COLPM2
-;
-;TabColor01		
-;		lda $FFFF,x
-;		sta COLPM1
-;
-;TabColor00		
-;		lda $FFFF,x
-;		sta COLPM0		
-;
-;		lda #$00
-;		ldx #$00
-;		ldy m_oldPlayerScreenTopY
-;zfill	
-;		txa
-;		pha		
-;		ldx #PLR_NUM_PMG	
-;		
-;		cpx #$01
-;		beq Clear00
-;		
-;		cpx #$02
-;		beq Clear01
-;		
-;		cpx #$03
-;		beq Clear02
-;		
-;Clear03		
-;		lda #$00
-;		sta p3_area_1,y
-;Clear02		
-;		lda #$00
-;		sta p2_area_1,y		
-;Clear01		
-;		lda #$00
-;		sta p1_area_1,y
-;Clear00		
-;		lda #$00
-;		sta p0_area_1,y
-;
-;		iny
-;		
-;		pla		
-;		tax
-;		inx
-;
-;		cpx m_animHeight
-;		bne zfill
-;
-;		ldx m_animIndex
-;		jsr FlipPlayer		
-;
-;		lda #$00
-;		sta m_animCount
-;		
-;		ldx m_animOffset
-;		ldy m_playerScreenTopY	
-;fill01
-;;		lda TabPlayerShape_01,x
-;;		sta p0_area_1,y		
-;		
-;;		lda TabPlayerShape_01A,x
-;;		sta p1_area_1,y
-;;		
-;;		lda TabPlayerShape_01B,x
-;;		sta p2_area_1,y
-;;		
-;;		iny
-;;		inx
-;;		inc m_animCount
-;;		lda m_animCount
-;;		cmp m_animHeight
-;;		bcc fill01
-;;
-;DP_exit
-;		rts
-;.endp
-		
-;
-;**************************************************************************************************
-; DrawPlayerExplosion
-;**************************************************************************************************
-;
-.proc DrawPlayerExplosion
-
-;		lda m_missleBaseColor00
-;		sta COLPM0
-;
-;;************************************************
-;;
-;DPE_erase										; erase previous player explosion frame
-;		ldx #0
-;		ldy m_playerExplosionScreenTopY_H1
-;
-;;************************************************
-;;
-;DPE_erase_loop
-;		lda #0
-;		sta p0_area_1,y
-;		sta p1_area_1,y
-;		sta p2_area_1,y
-;		
-;		tya
-;		clc
-;		adc m_playerExplosionStep
-;		bcs DPE_update_frame
-;		tay
-;
-;		inx
-;		cpx m_playerSizeY
-;		bne DPE_erase_loop
-;
-;;************************************************
-;; 	update step and explosion starting line
-;; 	if step +1 --> line - 3.5
-;; 	if step +2 --> line - 7.0
-;;
-;DPE_update_frame
-;		lda m_playerExplosionScreenTopY_L1
-;		sec
-;		sbc #$80
-;		sta m_playerExplosionScreenTopY_L1
-;
-;		lda m_playerExplosionScreenTopY_H1
-;		sbc #$03
-;		bcs DPE_do_update
-;
-;		lda #$00
-;		sta HPOSP0
-;		sta HPOSP1
-;		sta HPOSP2
-;		
-;		VcountWait 120
-;		
-;		jsr SetSpawnPos
-;		jsr InitPlayerInfo						; reached top of the screen, end explosion, respawn player
-;		
-;		jmp DPE_exit
-;	
-;;************************************************
-;;
-;DPE_do_update
-;		sta m_playerExplosionScreenTopY_H1
-;		inc m_playerExplosionStep				; step +1
-;
-;;************************************************
-;; draw new player explosion frame
-;DPE_draw										
-;		ldx #0
-;		ldy m_playerExplosionScreenTopY_H1
-;
-;;************************************************
-;;
-;DPE_draw_loop
-;		lda TabPlayerShape_01,x
-;		beq DPE_draw_p1
-;		sta p0_area_1,y
-;
-;;************************************************
-;;
-;DPE_draw_p1
-;		lda TabPlayerShape_01A,x
-;		beq DPE_draw_p2	
-;		sta p1_area_1,y
-;
-;;************************************************
-;;
-;DPE_draw_p2	
-;		lda TabPlayerShape_01B,x
-;		beq DPE_draw_end
-;		sta p2_area_1,y
-;
-;;************************************************
-;;
-;DPE_draw_end
-;		tya
-;		clc
-;		adc m_playerExplosionStep
-;		bcs DPE_exit
-;		tay
-;		inx
-;		cpx m_playerSizeY
-;		bne DPE_draw_loop
-
-;************************************************
-;
-DPE_exit
-		
-		rts
-
-.endp		
 ;
 ;**************************************************************************************************
 ; CheckPlayerInLevelRightLimit
@@ -1154,6 +707,7 @@ CPTC_exit
 		rts
 
 .endp		
+
 ;
 ;**************************************************************************************************
 ; CheckPlayerLeftCollision
@@ -1274,6 +828,7 @@ CPLC_exit
 		rts
 
 .endp	
+
 ;
 ;**************************************************************************************************
 ; CheckPlayerRightCollision
@@ -1403,6 +958,7 @@ CPRC_exit
 		rts
 		
 .endp		
+
 ;
 ;**************************************************************************************************
 ; AddSideAccelToSpeed
@@ -1447,12 +1003,13 @@ ASATS_exit
 		rts
 
 .endp
+
 ;
 ;**************************************************************************************************
 ; SubstractSideDeaccelToSpeed
 ;**************************************************************************************************
 ;
-SubstractSideDeaccelToSpeed
+.proc SubstractSideDeaccelToSpeed
 
 		lda m_playerSideSpeed_L1					; update frame speed with frame accel
 		sec
@@ -1475,6 +1032,8 @@ SSDTS_dont_reset_speed
 		sta m_playerSideSpeed_H1
 
 		rts	
+.endp
+
 ;
 ;**************************************************************************************************
 ; AddSideSpeedToPosition
@@ -1523,6 +1082,7 @@ ASSTP_exit
 		rts
 
 .endp
+
 ;
 ;**************************************************************************************************
 ; SubstractSideSpeedToPosition
@@ -1575,6 +1135,7 @@ SSSTP_exit
 		rts
 		
 .endp		
+
 ;
 ;**************************************************************************************************
 ; AddGravityAccelToSpeed
@@ -1615,6 +1176,7 @@ AGATS_exit
 		rts
 		
 .endp		
+
 ;
 ;**************************************************************************************************
 ; SubstractGravityAccelToSpeed
@@ -1644,6 +1206,7 @@ SGATS_dont_reset_speed
 		rts
 
 .endp
+
 ;
 ;**************************************************************************************************
 ; AddSpeedYToPosition
@@ -1680,6 +1243,7 @@ ASYTP_exit
 		rts
 		
 .endp		
+
 ;
 ;**************************************************************************************************
 ; SubstractSpeedYToPosition
@@ -1736,6 +1300,7 @@ SSYTP_exit
 		rts
 
 .endp		
+
 ;
 ;**************************************************************************************************
 ; AddWaterAccelToSpeed
@@ -1776,6 +1341,7 @@ AWATS_exit
 		rts
 	
 .endp	
+
 ;
 ;**************************************************************************************************
 ; SubstractWaterAccelToSpeed
@@ -1805,6 +1371,7 @@ SWATS_dont_reset_speed
 		rts
 		
 .endp		
+
 ;
 ;**************************************************************************************************
 ; AddWaterMoveUpAccelToSpeed
@@ -1843,6 +1410,7 @@ AWMUATS_exit
 		rts
 
 .endp	
+
 ;
 ;**************************************************************************************************
 ; AddWaterMoveDownAccelToSpeed
@@ -1894,6 +1462,7 @@ AWMAATS_exit
 		rts
 	
 .endp	
+
 ;
 ;**************************************************************************************************
 ; CheckPlayerBottomDownPos
@@ -1955,6 +1524,7 @@ CPBDP_no_carry
 		rts
 	
 .endp	
+
 ;
 ;**************************************************************************************************
 ; CheckPlayerBottomUpPos
@@ -2017,5 +1587,3 @@ CPBUP_no_carry
 		rts
 
 .endp	
-
-		

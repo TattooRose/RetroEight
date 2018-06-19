@@ -240,7 +240,7 @@ NoOverflow2
 
 CDI_loop
 
-		sta HudMemoryAddress,x
+		sta TextMemoryAddress,x
 		inx
 		cpx #40
 		bne CDI_loop

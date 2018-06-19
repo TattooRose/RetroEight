@@ -491,11 +491,11 @@ DSC_exit
 ; Include Files
 ;**************************************************************************************************
 ;
-	icl "Lib/StateInPlatform.Asm"
-	icl "Lib/StateJumping.Asm"
-	icl "Lib/StateFalling.Asm"
-	icl "Lib/StateClimbing.Asm"
-	icl "Lib/StateInWater.Asm"
+	icl "Framework/StateInPlatform.Asm"
+	icl "Framework/StateJumping.Asm"
+	icl "Framework/StateFalling.Asm"
+	icl "Framework/StateClimbing.Asm"
+	icl "Framework/StateInWater.Asm"
 ;	
 ;**************************************************************************************************
 ;
