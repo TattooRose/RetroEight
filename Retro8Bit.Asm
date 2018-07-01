@@ -52,11 +52,11 @@ ZeroPageAddress				= $80				; 122 bytes zero page ($80 to $F9)
 CommDspListAddr				= $0600				; 175 bytes for display list
 TextMemoryAddress			= $06B0				; Heads up display are
 
-DataAddress					= $9000				;  4K (size for data)
-SoundPlayerAddress			= $3400
-SoundDataAddress			= $4000
+SoundPlayerAddress			= $3400				; RMT player address
+SoundDataAddress			= $4000				; RMT music and sound area
 
 CodeAddress					= $4400				; 23K zone for code
+DataAddress					= $9000				;  4K (size for data)
 
 PmgAddress					= $A000				;  2K (2K size for PMG)
 GameFontAddress				= $A800				; 42K (1K size for FNT)
@@ -99,7 +99,10 @@ LEVEL_CHAR_SIZE_Y			= 24
 WINDOW_CHAR_SIZE_X			= 40
 WINDOW_CHAR_SIZE_Y			= 24
 
-;*****	Register bit settings
+GAME_MEM					= GameMemoryAddress			; used in FW_Camera.Asm. Must set this for camera to work			
+GAME_LMS1					= CommDspListAddr+3			; used in FW_Camera.Asm. Must set this for camera to work
+
+;*****	Graphics Registers bit settings
 ;
 GRACTL_OPTIONS				= [ENABLE_MISSILES 	| ENABLE_PLAYERS				| GTIA_MODE_9_COLOR]
 PRIOR_OPTIONS				= [PM_PRIORITY_1   	| FIFTH_PLAYER        			| MULTICOLOR_PM]	
@@ -107,7 +110,7 @@ DMACTL_OPTIONS				= [ENABLE_DL_DMA 	| PLAYFIELD_WIDTH_NORMAL_MASK 	| ENABLE_PM_D
 
 ;
 ;**************************************************************************************************
-; InitSystem - Start of code
+; 	InitSystem - Start of code
 ;**************************************************************************************************
 ;
 		org CodeAddress
@@ -156,14 +159,14 @@ RetroLoop
 
 ;*****	Start Game Play Setup
 ;
-		lda #$00
-		sta SDMCTL	
+		lda #$00								; Turn off screen related functions	
+		sta SDMCTL								; store it
 
 ;*****	Memory Settings
 ;
-		lda #<TextMemoryAddress					; set the text display address
+		lda #<TextMemoryAddress					; set the LSB text display address
 		sta m_hudMemoryAddress					; store the LSB
-		lda #>TextMemoryAddress					; set the text display address
+		lda #>TextMemoryAddress					; set the MSB text display address
 		sta m_hudMemoryAddress+1				; store the MSB
 
 ;*****	Display List Initialization
@@ -212,16 +215,16 @@ RetroLoop
 		
 		VCountWait 120
 		
-;*****	Initalize Components
+;*****	Initalize Level Components
 ;
-		jsr InitPlatforms
-		jsr InitGoldCounter
+		jsr VillianInitSystem		
+		jsr VilliansInit
 		
-		jsr InitVillianSystem		
-		jsr InitVillians
-		
-		jsr InitVillianManager
+		jsr InitEnemyManager
 		jsr InitMissileSystem
+		
+		jsr InitPlatforms
+		jsr InitObjectCounters
 		
 		VcountWait 120
 		
@@ -242,9 +245,6 @@ RetroLoop
 		lda #PRIOR_OPTIONS						; apply PRIOR options
 		sta PRIOR								; store it
 
-		lda #DMACTL_OPTIONS						; apply DMACTL options
-		sta DMACTL								; store it
-
 		lda #0									; clear the hit register
 		sta HITCLR								; store it
 
@@ -253,6 +253,11 @@ RetroLoop
 	    sta IRQEN
 	    
 		cli										; enable interrupts		
+
+		lda #DMACTL_OPTIONS						; apply DMACTL options
+		sta DMACTL								; store it
+
+		VcountWait 120
 
 		rts
 
@@ -330,7 +335,7 @@ PlayerNormalStates
 ;
 EnemyUpdate
 
-		jsr UpdateVillians
+		jsr VilliansUpdate
 		jsr UpdateEnemyManager
 	
 ;*****	MissilesStep
@@ -417,6 +422,11 @@ Loop
 		cpx #$10
 		bne Loop
 		
+		ldx #$00
+		lda VilState,x
+		ldy #70
+		jsr DisplayDebugInfoHexFF
+		
 .endif
 		
 		rts
@@ -453,7 +463,7 @@ Loop
 ENDOFCODE
 .PRINT "End of Code: ", ENDOFCODE
 .if ENDOFCODE > $9000
-	.error "Code exceeds defined code space."
+	.error "Code exceeds alloted area!"
 .endif		
 
 ;

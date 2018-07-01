@@ -25,7 +25,7 @@
 ;
 .proc CreepyInit
 
-		jsr GetVillianIndex						; Find an open index
+		jsr VillianGetIndex						; Find an open index
 
 		cpx #$FF								; See if it's valid		
 		bne Continue			
@@ -69,7 +69,23 @@ Continue
 		sta VilActive,x
 		
 		lda #$01								; set the characters speed
-		sta VilSpeedX_L1						; store it off
+		sta VilSpeedX_L1,x						; store it off
+		sta VilSpeedX_H1,x						; store it off
+		sta VilSideSpeedX_L1,x					; store it off
+		sta VilSideSpeedX_H1,x					; store it off
+		sta VilSideSpeedAccelX_L1,x				; store it off
+		sta VilSideSpeedAccelX_H1,x				; store it off
+		sta VilSideSpeedDeaccelX_L1,x			; store it off
+		sta VilSideSpeedDeaccelX_H1,x			; store it off
+
+		sta VilSpeedY_L1,x						; store it off
+		sta VilSpeedY_H1,x						; store it off
+		sta VilUpDownSpeedY_L1,x				; store it off
+		sta VilUpDownSpeedY_H1,x				; store it off
+		sta VilUpDownSpeedAccelY_L1,x			; store it off
+		sta VilUpDownSpeedAccelY_H1,x			; store it off
+		sta VilUpDownSpeedDeaccelY_L1,x			; store it off
+		sta VilUpDownSpeedDeaccelY_H1,x			; store it off
 
 		lda m_param00							; get the column value
 		sta VilScreenLeftX,x					; store it off
@@ -84,8 +100,9 @@ Continue
 
 		lda #$00
 		sta VilState,x							; store it off
-		sta VilSpeedY_L1						; store it off
-		
+		sta VilOldScreenTopY,x
+		sta VilOldScreenLeftX,x
+				
 		sta VilLevelLeftX_H2,x
 		sta VilLevelLeftX_H1,x
 		sta VilLevelLeftX_L1,x
@@ -239,39 +256,16 @@ Exit
 
 		ldx m_villianCurrIndex
 		cpx #$FF
-		bne ResetState
+		bne CheckMovement
 		jmp Exit
 		
-ResetState
-
-		lda #$00
-		sta VilState,x
-		
-CheckDirection
+CheckMovement
 
 		lda VilDir,x
-		cmp #PSD_LEFT
-		beq MoveLeft
+		sta m_oldCollisionX
 		
-MoveRight
-
-;		lda VilLevelLeftX_H1,x
-;		adc #$01
-;		sta VilLevelLeftX_H1,x
-;				
-;		jsr SetVillianInfo		
-		jsr GetVillianFontChar
-		
-		cmp #$00
-		beq Exit
-		lda #$01
-		sta VilState,x
-		bne Exit
-		
-MoveLeft
-		
-
-
+		jsr VillianSideMovement
+				
 Exit
 
 		rts

@@ -43,8 +43,26 @@ VilTotalFrame				:MAX_VILLIANS	.byte $00
 VilSpeedX_L1				:MAX_VILLIANS 	.byte $00
 VilSpeedX_H1				:MAX_VILLIANS 	.byte $00
 
+VilSideSpeedX_L1			:MAX_VILLIANS	.byte $00
+VilSideSpeedX_H1			:MAX_VILLIANS	.byte $00
+
+VilSideSpeedAccelX_L1		:MAX_VILLIANS	.byte $00
+VilSideSpeedAccelX_H1		:MAX_VILLIANS	.byte $00
+
+VilSideSpeedDeaccelX_L1		:MAX_VILLIANS	.byte $00
+VilSideSpeedDeaccelX_H1		:MAX_VILLIANS	.byte $00
+
 VilSpeedY_L1				:MAX_VILLIANS 	.byte $00
 VilSpeedY_H1				:MAX_VILLIANS 	.byte $00
+
+VilUpDownSpeedY_L1			:MAX_VILLIANS 	.byte $00
+VilUpDownSpeedY_H1			:MAX_VILLIANS 	.byte $00
+
+VilUpDownSpeedAccelY_L1		:MAX_VILLIANS	.byte $00
+VilUpDownSpeedAccelY_H1		:MAX_VILLIANS	.byte $00
+
+VilUpDownSpeedDeaccelY_L1	:MAX_VILLIANS	.byte $00
+VilUpDownSpeedDeaccelY_H1	:MAX_VILLIANS	.byte $00
 
 VilScreenTopY				:MAX_VILLIANS	.byte $00
 VilOldScreenTopY			:MAX_VILLIANS	.byte $00
@@ -68,6 +86,13 @@ VilLevelBottomY_H1			:MAX_VILLIANS 	.byte $00
 VilLevelBottomY_H2			:MAX_VILLIANS 	.byte $00
 VilLevelBottomY_L1			:MAX_VILLIANS 	.byte $00
 
+m_vilCollisionY				.byte $00
+m_oldCollisionY				.byte $00
+
+m_vilCollisionX				.byte $00
+m_oldCollisionX				.byte $00
+
 m_villianCurrIndex			.byte $FF
+
 
 

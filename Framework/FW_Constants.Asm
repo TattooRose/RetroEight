@@ -10,6 +10,8 @@
 ;	
 ;***************************************************************************************************
 ;
+KEY							= $2fc				;keypressed code
+
 MUSIC_MENU 					= 0
 MUSIC_GAME 					= $0B
 MUSIC_GAME_OVER 			= $0E
@@ -19,12 +21,14 @@ SFX_DIAMOND 				= 1
 SFX_FIRE					= 4
 SFX_ALL_PICKED 				= 12
 SFX_DEATH 					= 3
-SFX_CONGRATULATIONS 		= 16
-SFX_JUMP 					= 4
+SFX_CONGRATULATIONS 		= 15
+SFX_JUMP 					= 2
 
 PSD_NONE					= 0					; player side direction
 PSD_RIGHT					= 1
 PSD_LEFT					= 2
+PSD_UP						= 3
+PSD_DOWN					= 4
 
 PS_STATIC					= 0					; player states
 PS_OVER_PLATFORM			= 1
@@ -54,9 +58,6 @@ TS_JUST_PRESSED				= 0
 
 ENEMY_SHOOT_DELTA_Y			= 32
 
-GAME_MEM					= GameMemoryAddress			; used in FW_Camera.Asm. Must set this for camera to work			
-GAME_LMS1					= CommDspListAddr+3			; used in FW_Camera.Asm. Must set this for camera to work
-
 ;*****	Set these constants depending on TV system
 ; 
 .if PAL_VERSION = 0
@@ -70,11 +71,11 @@ GAME_LMS1					= CommDspListAddr+3			; used in FW_Camera.Asm. Must set this for c
 	SIDE_SPEED_LAND_H1		= 1					; 001.160 --> 97.5 pixels per second (at 60 fps only!)
 	SIDE_SPEED_LAND_L1		= 1 ;64
 	
-	SIDE_ACCEL_LAND_H1		= 0					; 6 frames (at 60 fps only!) or 0.x seconds, to reach max speed
-	SIDE_ACCEL_LAND_L1		= 16
+	SIDE_ACCEL_LAND_H1		= 1					; 6 frames (at 60 fps only!) or 0.x seconds, to reach max speed
+	SIDE_ACCEL_LAND_L1		= 128
 	
-	SIDE_DEACCEL_LAND_H1	= 0					; 3 frames (at 60 fps only!) or 0.x seconds, to reach zero speed
-	SIDE_DEACCEL_LAND_L1	= 32
+	SIDE_DEACCEL_LAND_H1	= 1					; 3 frames (at 60 fps only!) or 0.x seconds, to reach zero speed
+	SIDE_DEACCEL_LAND_L1	= 128
 	
 	SIDE_SPEED_WATER_H1		= 0
 	SIDE_SPEED_WATER_L1		= 128
@@ -161,4 +162,3 @@ p1_area_1 					= PmgAddress + $0500
 p2_area_1 					= PmgAddress + $0600
 p3_area_1 					= PmgAddress + $0700
 
-KEY							= $2fc				;keypressed code

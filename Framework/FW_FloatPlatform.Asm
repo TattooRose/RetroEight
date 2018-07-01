@@ -222,6 +222,110 @@ Exit
 
 ;
 ;**************************************************************************************************
+; 	InitPlatforms
+;**************************************************************************************************
+;
+.proc InitPlatforms
+
+		lda #$00
+		sta m_floatPlatformV
+		sta m_floatPlatformH
+		sta m_floatPlatformIdx	
+
+		ldx #$00
+Loop		
+		sta TabPlatformDir,x  
+		sta TabPlatformStep,x  
+		sta TabPlatformCount,x  
+		sta TabPlatformLSB_H,x
+		sta TabPlatformMSB_H,x
+		inx
+		cpx #$08
+		bne Loop
+		
+		ldx #$00			
+
+;****	1st Loop
+; 
+Loop1
+	
+		ldy #0									; column index
+	
+		lda TabLevelLineAddressLSB,x
+		sta m_ptrLevelLine
+		
+		lda TabLevelLineAddressMSB,x
+		sta m_ptrLevelLine+1
+
+;*****	2nd Loop
+;
+Loop2
+
+		lda (m_ptrLevelLine),y
+		sta m_currChar	
+		stx m_pageZeroTempValue
+		tax
+		lda TabCharDefinition,x
+		ldx m_pageZeroTempValue
+	
+		and #15
+		cmp #CT_FLOATPLATFORMH
+		bne IGC_no_gold
+		
+		lda TabPlatformCharID_H
+		cmp m_currChar
+		bne IGC_no_gold
+	
+		txa
+		pha
+		
+		tya
+		pha
+		
+		ldx	m_floatPlatformIdx
+		
+		clc		 
+		adc m_ptrLevelLine
+		sta m_platformScrnAddress
+		sta TabPlatformLSB_H,x
+		lda m_ptrLevelLine+1
+		adc #$00
+		sta m_platformScrnAddress+1
+		sta TabPlatformMSB_H,x		
+		
+		pla
+		tay
+		pla
+		tax
+		
+		inc m_floatPlatformIdx
+		lda #$01
+		sta m_floatPlatformH
+		
+;*****	No Gold
+;	
+IGC_no_gold
+
+		iny
+		cpy m_levelCharSizeX
+		bne Loop2
+
+;*****	Check Loop Y
+;
+IGC_check_loop_Y
+
+		inx
+		cpx m_levelCharSizeY
+		bne Loop1
+
+Exit			
+
+		rts		
+
+.endp
+
+;
+;**************************************************************************************************
 ; 	ClearPlatformMemory
 ;**************************************************************************************************
 ;
