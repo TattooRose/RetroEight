@@ -177,7 +177,7 @@ CCPM_init_position
 		jsr CreateMissile
 		
 		lda #SFX_FIRE
-		and #$0f
+		and #$0F
 		sta m_sfxEffect 
 
 CCPM_exit
@@ -308,6 +308,7 @@ GFMI_exit
 		ldx #0
 
 UMS_loop
+
 		lda TabMissileOwner,x	; if the owner is 0, the slot is free
 		bne UMS_update
 		jmp UMS_next

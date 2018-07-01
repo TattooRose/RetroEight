@@ -1,3 +1,15 @@
+;
+;**************************************************************************************************
+;
+;	Filename:		FW_Contants.Asm
+;
+;	Created On:		June 25, 2018 08:00:00
+;
+;	Comments:		Portions of this code taken from NRV's OPEN_PLAT project and
+;					Ken Jennings C64 to Atari MLP and also from WUDSN Tutorials.
+;	
+;***************************************************************************************************
+;
 MUSIC_MENU 					= 0
 MUSIC_GAME 					= $0B
 MUSIC_GAME_OVER 			= $0E
@@ -41,6 +53,9 @@ TS_PRESSED					= 0
 TS_JUST_PRESSED				= 0
 
 ENEMY_SHOOT_DELTA_Y			= 32
+
+GAME_MEM					= GameMemoryAddress			; used in FW_Camera.Asm. Must set this for camera to work			
+GAME_LMS1					= CommDspListAddr+3			; used in FW_Camera.Asm. Must set this for camera to work
 
 ;*****	Set these constants depending on TV system
 ; 
@@ -137,12 +152,6 @@ ENEMY_SHOOT_DELTA_Y			= 32
 	VLASER_DISABLED_INDEX	= 50
 
 .endif
-
-;*****	Register bit settings
-;
-GRACTL_OPTIONS				= [ENABLE_MISSILES 	| ENABLE_PLAYERS				| GTIA_MODE_9_COLOR]
-PRIOR_OPTIONS				= [PM_PRIORITY_1   	| FIFTH_PLAYER        			| MULTICOLOR_PM]	
-DMACTL_OPTIONS				= [ENABLE_DL_DMA 	| PLAYFIELD_WIDTH_NORMAL_MASK 	| ENABLE_PM_DMA 	| PM_1LINE_RESOLUTION] 
 
 ;*****	Player missle address definitions
 ;

@@ -101,6 +101,18 @@ TabAnimLaserFrameTime			:25 .byte $01, $01
 
 .endif
 
+m_animSeaTopTimer				.byte $00
+
+m_firstCoinAnimIndex			.byte $00
+m_emptyCoinAnimIndex			.byte $00
+m_currentCoinAnimations			.byte $00
+
+m_animHLaserTimer				.byte $01
+m_animHLaserCurrentFrame		.byte $00
+
+m_animVLaserTimer				.byte $01
+m_animVLaserCurrentFrame		.byte $00
+
 ;
 ;**************************************************************************************************
 ; DoFontAnimations	
@@ -434,9 +446,14 @@ Exit
 ;		sbc #$01
 ;		dey
 ;		bne Sub1
-;
-;;*****	Exit Method
-;Exit
+;		
+;				 
+;		
+;Loop
+				
+
+;*****	Exit Method
+Exit
 
 		rts
 

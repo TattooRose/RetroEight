@@ -31,7 +31,7 @@ PLAYER		equ SoundPlayerAddress
 ;*
 ;* RMT FEATures definitions file
 ;* For optimizations of RMT player routine to concrete RMT modul only!
-	icl "RmtFeat.Asm"
+	icl "Framework/FW_RmtFeat.Asm"
 ;*
 ;* RMT ZeroPage addresses
 	;org $80

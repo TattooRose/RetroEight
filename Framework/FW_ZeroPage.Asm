@@ -1,7 +1,7 @@
 ;
 ;***************************************************************************************************
 ;
-;	Filename:		ZeroPage.Asm
+;	Filename:		FW_ZeroPage.Asm
 ;
 ;	Modified On:	Thur Apr 26, 2018 01:12 PM
 ;
@@ -38,6 +38,13 @@ m_param01					org *+$01
 m_param02					org *+$01
 m_param03					org *+$01
 
+m_vars00					org *+$01
+m_vars01					org *+$01
+m_vars02					org *+$01
+m_vars03					org *+$01
+m_vars04					org *+$01
+m_vars05					org *+$01
+
 m_saveRegA					org *+$01
 m_saveRegX					org *+$01
 m_saveRegY					org *+$01
@@ -65,11 +72,11 @@ m_playerLevelBottomY_H2		org *+$01			; bottom line coordinate
 m_playerLevelBottomY_H1		org *+$01
 m_playerLevelBottomY_L1		org *+$01
 
+m_playerSpeedY_H1			org *+$01
+m_playerSpeedY_L1			org *+$01
+
 m_playerSideSpeed_H1		org *+$01
 m_playerSideSpeed_L1		org *+$01
-
-m_playerMaxSideSpeed_H1		org *+$01
-m_playerMaxSideSpeed_L1		org *+$01
 
 m_playerSideAccel_H1		org *+$01
 m_playerSideAccel_L1		org *+$01
@@ -77,8 +84,8 @@ m_playerSideAccel_L1		org *+$01
 m_playerSideDeaccel_H1		org *+$01
 m_playerSideDeaccel_L1		org *+$01
 
-m_playerSpeedY_H1			org *+$01
-m_playerSpeedY_L1			org *+$01
+m_playerMaxSideSpeed_H1		org *+$01
+m_playerMaxSideSpeed_L1		org *+$01
 
 m_playerJumpSpeed_H1		org *+$01
 m_playerJumpSpeed_L1		org *+$01
@@ -116,21 +123,7 @@ m_oldPlayerState			org *+$01			; 0-static, 1-over platform, 2-jumping up, 3-fall
 
 m_pageZeroTempValue			org *+$01
 
-m_levelCharSizeX			org *+$01			; char size X goes from 1 to 255 characters, 0 = 256 characters
-m_levelCharSizeY			org *+$01			; char size Y goes from 1 to 255 characters, 0 = 256 characters
-
-m_levelSizeX_H2				org *+$01
-m_levelSizeX_H1				org *+$01
-
-m_levelSizeY_H2				org *+$01
-m_levelSizeY_H1				org *+$01
-
-m_levelWindowX_H2			org *+$01
-m_levelWindowX_H1			org *+$01
-
-m_levelWindowY_H2			org *+$01
-m_levelWindowY_H1			org *+$01
-
+m_paramW00					org *+$02
 m_paramW01					org *+$02
 m_paramW02					org *+$02
 m_paramW03					org *+$02

@@ -1,7 +1,7 @@
 ;
 ;***************************************************************************************************
 ;
-;	Filename:		AtariEquates.Asm
+;	Filename:		SysEquates.Asm
 ;
 ;	Modified On:	Thur Apr 26, 2018 01:12 PM
 ;

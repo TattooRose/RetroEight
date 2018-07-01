@@ -10,6 +10,54 @@
 ;				
 ;***************************************************************************************************
 ;
+
+;
+;**************************************************************************************************
+;
+;	SetSpawnPos
+;
+;		Set the initial position of the player.
+;		Uses PARAM00 as the level number.		
+;
+;**************************************************************************************************
+;
+.proc SetSpawnPos		
+		
+		lda #0
+		sta m_playerLevelLeftX_L1				; fractional part
+		sta m_playerLevelLeftX_H1
+		sta m_playerLevelLeftX_H2		
+		sta m_playerLevelBottomY_H1
+		sta m_playerLevelBottomY_L1				; fractional part
+		sta m_playerLevelBottomY_H2
+		
+		; set spawn position
+		ldy m_param00
+		lda LevelsPlayer_X,y
+		ldx #$04
+		jsr MultiplyAX
+		
+		lda _productLo
+		clc
+		adc #$03
+		sta m_playerLevelLeftX_H1
+		
+		lda LevelsPlayer_Y,y
+		ldx #$08
+		jsr MultiplyAX
+		
+		lda _productLo
+		clc
+		adc #$07
+		sta m_playerLevelBottomY_H1
+
+		jsr SetPlayerInfo						; Set the players info	
+	
+		rts
+
+.endp	
+
+;
 ;**************************************************************************************************
 ; 	InitPlayer
 ; 		remember that we don't use any speed over 1 char per frame right now,
@@ -151,49 +199,6 @@
 		rts
 
 .endp		
-
-;
-;**************************************************************************************************
-;
-;	SetSpawnPos
-;
-;		Set the initial position of the player.
-;		Uses PARAM00 as the level number.		
-;
-;**************************************************************************************************
-;
-.proc SetSpawnPos		
-		
-		lda #0
-		sta m_playerLevelLeftX_L1				; fractional part
-		sta m_playerLevelLeftX_H1
-		sta m_playerLevelLeftX_H2		
-		sta m_playerLevelBottomY_H1
-		sta m_playerLevelBottomY_L1				; fractional part
-		sta m_playerLevelBottomY_H2
-		
-		; set spawn position
-		ldy m_param00
-		lda LevelsPlayer_X,y
-		ldx #$04
-		jsr MultiplyAX
-		
-		lda _productLo
-		sta m_playerLevelLeftX_H1
-		
-		lda LevelsPlayer_Y,y
-		ldx #$08
-		jsr MultiplyAX
-		
-		lda _productLo
-		adc #7		
-		sta m_playerLevelBottomY_H1
-
-		jsr SetPlayerInfo						; Set the players info	
-	
-		rts
-
-.endp	
 
 ;
 ;**************************************************************************************************
@@ -463,6 +468,7 @@ CHBP_no_hole
 		sta m_playerOverPlatformFlag
 		rts
 .endp
+
 ;
 ;**************************************************************************************************
 ; CheckPlayerBottomCollision
@@ -575,7 +581,8 @@ CPBC_found_collision
 CPBC_exit
 		rts
 
-.endp		
+.endp	
+	
 ;
 ;**************************************************************************************************
 ; CheckPlayerTopCollision

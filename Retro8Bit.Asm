@@ -1,13 +1,13 @@
 ;
-;***************************************************************************************************
+;**************************************************************************************************
 ;
-;	Filename:		Retro.Asm
+;	Filename:		Retro8Bit.Asm
 ;
-;	Modified On:	Thur Apr 26, 2018 01:12 PM
+;	Created On:		June 25, 2018 08:00:00
 ;
 ;	Comments:		Portions of this code taken from NRV's OPEN_PLAT project and
 ;					Ken Jennings C64 to Atari MLP and also from WUDSN Tutorials.
-;				
+;	
 ;***************************************************************************************************
 ;
 ;	1 page 				= 256 bytes
@@ -39,12 +39,12 @@
 ; 	Include Library Files
 ;**************************************************************************************************
 ;
-		icl "Framework/AtariEquates.Asm"				; Atari hardware DOS,OS,ANTIC,GITA,POKEY,PIA equates
-		icl "Framework/SysMacros.Asm"					; General purpose macros used by system
+		icl "Framework/FW_SysEquates.Asm"
+		icl "Framework/FW_SysMacros.Asm"
 
 ;
 ;**************************************************************************************************
-; 	Memory map
+; 	ORG Memory map
 ;**************************************************************************************************
 ;
 ZeroPageAddress				= $80				; 122 bytes zero page ($80 to $F9) 
@@ -52,7 +52,7 @@ ZeroPageAddress				= $80				; 122 bytes zero page ($80 to $F9)
 CommDspListAddr				= $0600				; 175 bytes for display list
 TextMemoryAddress			= $06B0				; Heads up display are
 
-DataAddress					= $2000				;  4K (size for data)
+DataAddress					= $9000				;  4K (size for data)
 SoundPlayerAddress			= $3400
 SoundDataAddress			= $4000
 
@@ -63,17 +63,17 @@ GameFontAddress				= $A800				; 42K (1K size for FNT)
 TextFontAddress				= $AC00				; 39K (1K size for FNT)
 
 GameMemoryAddress			= $B000				; 44K (4K size for Screen)
-
+		
 ;
 ;**************************************************************************************************
-; 	Zero Page Members
+; 	Zero Page Members and Constants
 ;**************************************************************************************************
 ;
 		org ZeroPageAddress		
 		
-		icl "Framework/ZeroPage.Asm"
-		icl "Framework/EngineConstants.Asm"
-
+		icl "Framework/FW_ZeroPage.Asm"
+		icl "Framework/FW_Constants.Asm"
+		
 ;
 ;**************************************************************************************************
 ; 	Common constants placed here for better access
@@ -99,41 +99,11 @@ LEVEL_CHAR_SIZE_Y			= 24
 WINDOW_CHAR_SIZE_X			= 40
 WINDOW_CHAR_SIZE_Y			= 24
 
+;*****	Register bit settings
 ;
-;**************************************************************************************************
-; 	Data Address
-;**************************************************************************************************
-;
-		org DataAddress	
-		
-		icl "Framework/EngineData.Asm"
-		icl "Data/Levels.Asm"
-
-		icl "DataPlayer.Asm"
-		icl "DataCreepy.Asm"
-		icl "DisplayListData.Asm"
-
-;*****	Data and Code area check
-;
-ENDOFDATA
-.if ENDOFDATA > [SoundPlayerAddress - $0400]
-	.error "Data area overwritting Sound player data area!"
-.endif		
-
-;
-;**************************************************************************************************
-; 	Sound Data Address
-;**************************************************************************************************
-;
-		org SoundDataAddress
-		opt h-									; RMT module is standard Atari binary file already
-		ins "Data/sfx.rmt"						; include music RMT module
-		opt h+
-
-ENDOFSOUNDDATA
-.if ENDOFSOUNDDATA > CodeAddress
-	.error "Sound Data area overwritting Code area!"
-.endif				
+GRACTL_OPTIONS				= [ENABLE_MISSILES 	| ENABLE_PLAYERS				| GTIA_MODE_9_COLOR]
+PRIOR_OPTIONS				= [PM_PRIORITY_1   	| FIFTH_PLAYER        			| MULTICOLOR_PM]	
+DMACTL_OPTIONS				= [ENABLE_DL_DMA 	| PLAYFIELD_WIDTH_NORMAL_MASK 	| ENABLE_PM_DMA 	| PM_1LINE_RESOLUTION] 
 
 ;
 ;**************************************************************************************************
@@ -142,6 +112,8 @@ ENDOFSOUNDDATA
 ;
 		org CodeAddress
 
+;*****	Start here
+;
 InitSystem
 
 		lda PAL									; only run in the correct system
@@ -159,64 +131,43 @@ No_Ntsc_Loop
 
 .endif
 		ClearSystem								; begin machine setup
-		DisableBasic							; disable to use memory
-
-		SetRamTop #32							; Set Ramtop
+		DisableBasic							; disable basic to use memory
 		
-		jsr InitVars							; Initialize the variables
-		jsr DoLoadLevel							; Initialize and load the first level
+		SetRamTop #32							; Set Ramtop less 8K
 
-		jsr InitMissileSystem
-					
+		lda #$00
+		sta m_currLevelNum						; grab the current level number
+
+		jsr InitGameLevel						; init the game play levle
+
+;*****	Retro Game Loop
+;
 RetroLoop
 		
-		jsr PlayLevel							; play this level
-		jmp RetroLoop							; endless loop
-
-;
-;**************************************************************************************************
-; 	PlayLevel
-;**************************************************************************************************
-;
-.proc PlayLevel
-
-PlayLoop		
-
-		jsr CheckInput
-		jsr UpdateTimers
-		jmp (m_playerMethodPointer)
-	
-PlayerMethodReturn
-
-		jsr SetPlayerScreenPos
-		jsr DrawPlayer
-
-		VcountWait 120
-		jmp PlayLoop
-		
-Exit		
-	
-		rts
-
-.endp
+		jsr PlayLevel							; play the level
+		jmp RetroLoop							; inifinit loop
 		
 ;
 ;**************************************************************************************************
-;	DoLoadLevel
+; 	InitGameLevel - Initializes the given level for game play
 ;**************************************************************************************************
 ;
-.proc DoLoadLevel
+.proc InitGameLevel
 
+;*****	Start Game Play Setup
+;
+		lda #$00
+		sta SDMCTL	
+
+;*****	Memory Settings
+;
 		lda #<TextMemoryAddress					; set the text display address
 		sta m_hudMemoryAddress					; store the LSB
 		lda #>TextMemoryAddress					; set the text display address
 		sta m_hudMemoryAddress+1				; store the MSB
 
-		SetVerticalBlank Game_VBI, VBI_I		; set the vertical blank interrupt
-		SetDisplayListInterrupt GameDli_01		; set the display list interrupts
-
-		VcountWait 120
-				
+;*****	Display List Initialization
+;
 		lda #GameDLEnd							; length of games display list data
 		sta m_param00 							; store it for the load routine		
 							
@@ -225,46 +176,57 @@ Exit
 		
 		jsr LoadDisplayListData					; perform the DL data move
 
-;*****	Housekeeping
-;
-		jsr SfxInit
-		jsr InitVars							; begin initialization
-		jsr InitPlayer							; do player initialization		
-		
-;*****	Set the addresses
-;
-SetAddresses
+		SetDisplayListInterrupt GameDli_01		; set the display list interrupts
+		VcountWait 120
 
-		SetDisplayListAddress CommDspListAddr	; set the display list address	
+;*****	Display List, Font, PM addresses
+;		
+		SetDisplayListAddress CommDspListAddr	; set the display list address
 		SetFontAddress GameFontAddress			; set the starting font address
 		SetPMBaseAddress PmgAddress				; set the player missile address
 
-		VcountWait 120							; make sure to wait so the setting takes effect
-				
-;*****	Load the level tables and the current level
-;	
+		VcountWait 120							; make sure to wait so the setting takes effect		
 
-		lda #<GameMemoryAddress					; set the game memory address
-		sta m_currentLineAddress				; to the zero page area
-		lda #>GameMemoryAddress					; in order to load the LSB/MSB
-		sta m_currentLineAddress+1				; of the display addresses
+;*****	Game Variables Initialization
+;
+		jsr SfxInit
+		jsr InitVars							; Initialize the variables
 
+;*****	Level Table Initialization
+;
+		lda #<GameMemoryAddress
+		sta m_currentLineAddress
+	
+		lda #>GameMemoryAddress
+		sta m_currentLineAddress+1
+		
 		jsr InitDraw							; set up the drawing members
 		jsr InitLevelTable						; set up the level table
-
+		
 		lda m_currLevelNum						; grab the current level number
 		sta m_param00							; store it to the parameter
-
 		jsr LoadLevel							; load the level
 
-		lda m_currLevelNum						; grab the current level number
-		sta m_param00							; store it to the parameter
+		jsr InitPlayer
 		jsr SetSpawnPos
-
+		
+		VCountWait 120
+		
+;*****	Initalize Components
+;
+		jsr InitPlatforms
+		jsr InitGoldCounter
+		
+		jsr InitVillianSystem		
+		jsr InitVillians
+		
+		jsr InitVillianManager
+		jsr InitMissileSystem
+		
+		VcountWait 120
+		
 ;*****	Initialize the Hardware
 ;
-InitHardware
-
 		lda #%01010101							; double width for all missiles
 		sta SIZEM								; store it
 
@@ -286,16 +248,150 @@ InitHardware
 		lda #0									; clear the hit register
 		sta HITCLR								; store it
 
-		lda #[NMI_VBI + NMI_DLI]				; enable VBI's and DLI's	
+		lda #[NMI_DLI]							; enable DLI's	
 		sta NMIEN								; store it
 	    sta IRQEN
 	    
-		cli										; enable interrupts
+		cli										; enable interrupts		
 
 		rts
 
-.endp
+.endp		
+
+;
+;**************************************************************************************************
+; 	PlayLevel
+;**************************************************************************************************
+;
+.proc PlayLevel
+
+;*****	Start Level
+;
+StartLevel
+
+		lda #$00								; reset the game timer
+		sta m_disableGameTimer					; to a zero value
+		
+;*****	Main target label for looping
+;
+Loop		
+		lda m_stick0
+		and #$0F
+		cmp #$0F
+		bne CheckState
+		jmp CheckUserInput
+
+;*****	Check th players state
+;
+CheckState
+		
+		lda m_playerState
+		cmp #$02		
+		beq JumpSound
+*
+		cmp #$03
+		beq JumpSound
+		
+		jmp CheckUserInput
+		
+;*****	Set the jump sound
+;
+JumpSound
+		
+		lda #SFX_JUMP
+		and #$0f
+		sta m_sfxEffect
+		
+;*****	Check User Input
+;		
+CheckUserInput
+
+		jsr CheckInput
+		jsr UpdateTimers
+		jmp (m_playerMethodPointer)
 	
+;*****	PlayerMethodReturn
+;
+PlayerMethodReturn
+
+		lda m_playerState
+		cmp #PS_LOSE
+		beq PlayerEndStates
+	
+;*****	PlayerNormalStates	
+;
+PlayerNormalStates
+
+		;jsr UpdateCameraWindow
+		jsr SetPlayerScreenPos
+		jsr DrawPlayer
+			
+;*****	EnemyUpdate
+;
+EnemyUpdate
+
+		jsr UpdateVillians
+		jsr UpdateEnemyManager
+	
+;*****	MissilesStep
+;
+MissilesStep
+
+		jsr UpdateMissileSystem
+		jsr DrawEnemyExplosion
+	
+;*****	GameAnimations
+;
+GameAnimations
+	
+		jsr AnimatePlatformH		
+		jsr DoFontAnimations
+		jsr UpdateCoinAnimations
+		jsr UpdateInfoLine
+		jsr SfxUpdate
+				
+		VcountWait 120
+		
+		jsr CheckPMCollisions		
+		jsr DebugInfo
+		
+		lda m_disableGameTimer	
+		bne Exit		
+		
+		jmp Loop
+	
+;*****	PlayerEndStates
+;
+PlayerEndStates		
+
+		lda SFX_DEATH
+		and #$0F
+		sta m_sfxEffect
+
+		jsr AnimatePlatformH		
+		jsr DrawPlayerExplosion
+		jsr DoFontAnimations
+		jsr UpdateCoinAnimations
+		jsr UpdateMissileSystem
+		jsr DrawEnemyExplosion
+		jsr UpdateInfoLine
+		jsr SfxUpdate
+		jsr DebugInfo				
+
+		VcountWait 120
+
+		lda #0
+		sta HITCLR	
+
+		jmp Loop		
+		
+;*****	Exit Play Level - Cleanup
+;
+Exit
+		jsr SfxInit
+		rts		
+.endp
+
 ;
 ;**************************************************************************************************
 ;	DebugInfo
@@ -305,71 +401,88 @@ InitHardware
 
 .if DEBUG_ON = 1
 
-		lda m_playerState		
-		ldy #40
+		lda #$28
+		sta m_vars00
+		ldx #$08
+Loop
+		lda TabHardwareCollision,x
+		ldy m_vars00		
 		jsr DisplayDebugInfoHexFF
 
-		lda m_lastPlayerSideDirection		
-		ldy #43
-		jsr DisplayDebugInfoHexFF
-					
-		lda _plrAnimationTableIndex
-		ldy #46
-		jsr DisplayDebugInfoHexFF
-		
-		lda _plrAnimationTableFrame
-		ldy #49
-		jsr DisplayDebugInfoHexFF
-		
-		lda _plrAnimationOffset
-		ldy #52
-		jsr DisplayDebugInfoHexFF
-		
-		lda _plrAnimationFrame
-		ldy #55
-		jsr DisplayDebugInfoHexFF
+		lda m_vars00
+		adc #$03
+		sta m_vars00
+
+		inx
+		cpx #$10
+		bne Loop
 		
 .endif
 		
 		rts
+		
 .endp
-		
-;
-;**************************************************************************************************
-;	Game_VBI
-;
-;		Games Vertical Blank Routine
-;
-;**************************************************************************************************
-;
-Game_VBI
-		
-		jsr SfxUpdate							; update music and sound effects
-		jsr UpdateInfoLine						; update the games HUD information
-		jsr DebugInfo
-		jmp XITVBL								; end vbi		
 		
 ;
 ;**************************************************************************************************
 ;	Code Include Files
 ;**************************************************************************************************
 ;
-		icl "DisplayListInterrupts.Asm"
+		icl "DisplayListInterrupts.Asm"		
 		icl "DrawPlayer.Asm"
+		icl "DrawCreepy.Asm"
+
+		icl "Framework/FW_Initialize.Asm"
+		icl "Framework/FW_CameraLogic.Asm"
+		icl "Framework/FW_AudioManager.Asm"
+		icl "Framework/FW_AnimationsLogic.Asm"
+		icl "Framework/FW_EnemyManager.Asm"
+		icl "Framework/FW_VillianSystem.Asm"
+		icl "Framework/FW_FloatPlatform.Asm"
+		icl "Framework/FW_JoyKeyAndCollision.Asm"
+		icl "Framework/FW_LevelLoader.Asm"
+		icl "Framework/FW_MissileSystem.Asm"
+		icl "Framework/FW_PlayerMovement.Asm"
+		icl "Framework/FW_PlayerStates.Asm"	
+		icl "Framework/FW_RmtPlayer.Asm"
+		icl "Framework/FW_SysUtils.Asm"
+		icl "Framework/FW_SysProcs.Asm"
+
+;*****	End of code check
+;
+ENDOFCODE
+.PRINT "End of Code: ", ENDOFCODE
+.if ENDOFCODE > $9000
+	.error "Code exceeds defined code space."
+.endif		
+
+;
+;**************************************************************************************************
+; 	Data Address
+;**************************************************************************************************
+;
+		org DataAddress	
 		
-		icl "Framework/Initialize.Asm"
-		icl "Framework/AudioManager.Asm"
-		icl "Framework/AnimationsLogic.Asm"
-		icl "Framework/EnemyManager.Asm"
-		icl "Framework/FloatPlatform.Asm"
-		icl "Framework/JoyKeyAndCollision.Asm"
-		icl "Framework/LevelLoader.Asm"
-		icl "Framework/MissileSystem.Asm"
-		icl "Framework/PlayerMovement.Asm"
-		icl "Framework/PlayerStates.Asm"	
-		icl "Framework/RmtPlayer.Asm"
-		icl "Framework/Utilities.Asm"
-		icl "Framework/SysProcs.Asm"
+		icl "Framework/FW_FrameworkData.Asm"
+		icl "Framework/FW_VillianSystemData.Asm"		
+
+		icl "Data/Levels.Asm"		
+
+		icl "DataDisplayList.Asm"
+		icl "DataSystem.Asm"
+		icl "DataPlayer.Asm"
+		icl "DataCreepy.Asm"
+
+;
+;**************************************************************************************************
+; 	Sound Data Address
+;**************************************************************************************************
+;
+		org SoundDataAddress
+		
+		opt h-									; RMT module is standard Atari binary file already
+		ins "Data/sfx.rmt"						; include music RMT module
+		opt h+
 
 ;
 ;**************************************************************************************************
@@ -377,6 +490,7 @@ Game_VBI
 ;**************************************************************************************************
 ;
 		org GameFontAddress
+		
 		ins "Data/scroller.fnt"
 
 ;
@@ -385,6 +499,7 @@ Game_VBI
 ;**************************************************************************************************
 ;
 		org TextFontAddress
+		
 		ins "Data/atari.fnt"
 		
 ;
@@ -393,6 +508,7 @@ Game_VBI
 ;**************************************************************************************************
 ;
 		org GameMemoryAddress
+		
 		.rept [$1000 - [LEVEL_CHAR_SIZE_Y*LEVEL_CHAR_SIZE_X]]
 			.byte $00
 		.endr
@@ -418,5 +534,3 @@ Game_VBI
 ;**************************************************************************************************
 ;
 		run InitSystem
-					
-					

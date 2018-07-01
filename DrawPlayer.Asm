@@ -198,6 +198,7 @@ StartDraw
 		sta HPOSP1								; store it in the regiaters
 
 		lda #$00
+		ldx #$00
 		ldy m_oldPlayerScreenTopY
 		
 ClearPlayer		
@@ -205,24 +206,25 @@ ClearPlayer
 		sta p0_area_1,y	
 		sta p1_area_1,y	
 		iny
-		cpy _plrAnimationHeight
+		inx
+		cpx _plrAnimationHeight
 		bne ClearPlayer
 		
 		ldx _plrAnimationTableIndex
 		
 		lda PlrTabAnimLSB,x						; load the animation LSB
 		sta m_paramW01							; store it in the LO byte
-		lda PlrTabAnimMSB, x						; load the animation MSB
+		lda PlrTabAnimMSB, x					; load the animation MSB
 		sta m_paramW01+1						; store it in the HI byte
 		
-		lda PlrTabAnimLSB+1,x						; load the animation LSB
+		lda PlrTabAnimLSB+1,x					; load the animation LSB
 		sta m_paramW02							; store it in the LO byte
-		lda PlrTabAnimMSB+1,x						; load the animation MSB
+		lda PlrTabAnimMSB+1,x					; load the animation MSB
 		sta m_paramW02+1						; store it in the HI byte
 
-		lda PlrTabColorsLSB,x						; load the color LSB
+		lda PlrTabColorsLSB,x					; load the color LSB
 		sta TabColor00+1						; store it in the LO color slot
-		lda PlrTabColorsMSB,x						; load the color LSB
+		lda PlrTabColorsMSB,x					; load the color LSB
 		sta TabColor00+2						; store it in the HI color slot
 
 		lda PlrTabColorsLSB+1,x					; load the color LSB
@@ -233,10 +235,12 @@ ClearPlayer
 		ldx _plrAnimationTableFrame
 		
 TabColor00		
+
 		lda $FFFF,x								; grab the color
 		sta COLPM0								; store it in the register
 		
 TabColor01		
+
 		lda $FFFF,x								; grab the color
 		sta COLPM1								; store it in the register
 
@@ -260,8 +264,11 @@ TabAnim
 		lda _plrAnimationHeightCount
 		cmp _plrAnimationHeight
 		bne TabAnim
+
 Exit
+
 		rts
+
 .endp
 
 ;
@@ -318,8 +325,11 @@ DPE_update_frame
 		
 		VcountWait 120
 		
+		lda m_currLevelNum
+		sta m_param00
+		
 		jsr SetSpawnPos
-		jsr InitPlayerInfo						; reached top of the screen, end explosion, respawn player
+		jsr InitPlayer							; reached top of the screen, end explosion, respawn player
 		
 		jmp DPE_exit
 	

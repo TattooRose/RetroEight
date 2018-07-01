@@ -282,7 +282,7 @@ DecrementCoins
 	
 	dec m_goldCounter
 	lda #SFX_DIAMOND
-	and #$0f
+	and #$0F
 	sta m_sfxEffect
 	jmp CC_start_animation
 	
@@ -292,7 +292,7 @@ DecrementHealth
 	
 	dec m_healthCounter
 	lda #SFX_DIAMOND
-	and #$0f
+	and #$0F
 	sta m_sfxEffect
 		
 ;*****	Start Animation
@@ -491,11 +491,11 @@ DSC_exit
 ; Include Files
 ;**************************************************************************************************
 ;
-	icl "Framework/StateInPlatform.Asm"
-	icl "Framework/StateJumping.Asm"
-	icl "Framework/StateFalling.Asm"
-	icl "Framework/StateClimbing.Asm"
-	icl "Framework/StateInWater.Asm"
+	icl "Framework/FW_StateInPlatform.Asm"
+	icl "Framework/FW_StateJumping.Asm"
+	icl "Framework/FW_StateFalling.Asm"
+	icl "Framework/FW_StateClimbing.Asm"
+	icl "Framework/FW_StateInWater.Asm"
 ;	
 ;**************************************************************************************************
 ;

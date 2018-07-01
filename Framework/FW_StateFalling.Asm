@@ -1,15 +1,4 @@
-;
-;***************************************************************************************************
-;
-;	Filename:		StateFalling.Asm
-;
-;	Modified On:	Thur Apr 26, 2018 01:12 PM
-;
-;	Comments:		Portions of this code taken from NRV's OPEN_PLAT project and
-;					Ken Jennings C64 to Atari MLP and also from WUDSN Tutorials.
-;				
-;***************************************************************************************************
-;
+
 PlayerMethodFalling
 
 	jsr CheckCollectable
@@ -64,22 +53,22 @@ PMF_snap_ladder
 
 ;----------------------------------------
 PMF_check_restart_jump
-;
-;	; uncomment this to allow infinite jumping
-; 	lda m_stick0
-; 	and #STICK_UP	; check up
-; 	bne PMF_check_in_water
-; 
-; 	lda m_oldStick0
-; 	and #STICK_UP	; check old up (looking for "just pressed")
-; 	beq PMF_check_in_water
-; 
-;	; start jumping state
-; 	ldx #PS_JUMPING
-; 	jsr SetPlayerMethod
-; 
-; 	jmp PMF_exit
-
+/*
+; uncomment this to allow infinite jumping
+ 	lda m_stick0
+ 	and #STICK_UP	; check up
+ 	bne PMF_check_in_water
+ 
+ 	lda m_oldStick0
+ 	and #STICK_UP	; check old up (looking for "just pressed")
+ 	beq PMF_check_in_water
+ 
+; start jumping state
+ 	ldx #PS_JUMPING
+ 	jsr SetPlayerMethod
+ 
+ 	jmp PMF_exit
+*/
 
 ;----------------------------------------
 PMF_check_in_water
@@ -125,4 +114,4 @@ PMF_update_falling
 
 
 PMF_exit
-	jmp PlayLevel.PlayerMethodReturn
+		jmp PlayLevel.PlayerMethodReturn

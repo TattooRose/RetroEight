@@ -14,21 +14,14 @@
 ;	Local Storage
 ;***************************************************************************************************
 ;
-CPY_WIDTH			= $08
-CPY_HEIGHT			= $0C
+CPY_WIDTH				= $08
+CPY_HEIGHT				= $0C
+CPY_BONUS_AMOUNT		= $64
+CPY_TOTAL_FRAMES		= $04
+CPY_ANIMATION_DELAY		= $08
 
-CPY_ANIMATION_DELAY	= $06
-
-CpyTabCurrFrames	.byte $00
-CpyTabTotalFrames	.byte $04
-
-CpyTabAnimLSB		.byte <CPY_WALKDATA
-CpyTabAnimMSB		.byte >CPY_WALKDATA
-
-CpyTabColorsLSB		.byte <CPY_WALKCOLORS
-CpyTabColorsMSB		.byte >CPY_WALKCOLORS
-
-CPY_WALKCOLORS		.BYTE $DC,$DC,$DC,$DC
+CPY_WALKCOLORS			
+ .BYTE $DC,$DC,$DC,$DC
 
 CPY_WALKDATA
 ; FRAME 1

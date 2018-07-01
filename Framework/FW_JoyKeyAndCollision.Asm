@@ -112,32 +112,15 @@ CI_check_trigger
 ;
 .proc CheckPMCollisions
 	
-		lda P0PF
-		sta TabHardwareCollision
-		lda P1PF
-		sta TabHardwareCollision+1
-		lda P2PF
-		sta TabHardwareCollision+2
-		lda P3PF
-		sta TabHardwareCollision+3
-		lda M0PL
-		sta TabHardwareCollision+4
-		lda M1PL
-		sta TabHardwareCollision+5
-		lda M2PL
-		sta TabHardwareCollision+6
-		lda M3PL
-		sta TabHardwareCollision+7
-		lda M0PF
-		sta TabHardwareCollision+8
-		lda M1PF
-		sta TabHardwareCollision+9
-		lda M2PF
-		sta TabHardwareCollision+10
-		lda M3PF
-		sta TabHardwareCollision+11
+		ldx #$0F
+
+CollisionLoop
 		
-		
+		lda M0PF,x
+		sta TabHardwareCollision,x
+		dex
+		bpl CollisionLoop
+				
 		
 ;*****	Check Missile 0 to Player 0
 ;

@@ -1,7 +1,7 @@
 ;
 ;***************************************************************************************************
 ;
-;	Filename:		EnemyManager.Asm
+;	Filename:		FW_EnemyManager.Asm
 ;
 ;	Modified On:	Thur Apr 26, 2018 01:12 PM
 ;
@@ -14,7 +14,7 @@
 ; Local Storage
 ;**************************************************************************************************
 ;
-MAX_ENEMIES_PER_LEVEL 			= 32
+MAX_VILLIANS_PER_LEVEL 			= 32
 MAX_ENEMY_MISSILES 				= 2
 MAX_EXPLOSION_STEPS 			= 22
 
@@ -44,32 +44,32 @@ TabEnemyShape_01
 								.byte %01111110
 
 
-TabEnemyType					:MAX_ENEMIES_PER_LEVEL .byte $00
+TabEnemyType					:MAX_VILLIANS_PER_LEVEL .byte $00
 	
 
 ; this table could be per level, if we can go back to the same screen
-TabEnemyLife					:MAX_ENEMIES_PER_LEVEL .byte $00
+TabEnemyLife					:MAX_VILLIANS_PER_LEVEL .byte $00
 	                        	
                             	
-TabEnemyState					:MAX_ENEMIES_PER_LEVEL .byte $00
+TabEnemyState					:MAX_VILLIANS_PER_LEVEL .byte $00
 	                        	
-TabEnemyStateTimer				:MAX_ENEMIES_PER_LEVEL .byte $00
+TabEnemyStateTimer				:MAX_VILLIANS_PER_LEVEL .byte $00
 	                        	
                             	
-TabEnemyBaseCharIndex			:MAX_ENEMIES_PER_LEVEL .byte $00	
+TabEnemyBaseCharIndex			:MAX_VILLIANS_PER_LEVEL .byte $00	
 	
-TabEnemyBaseCharX				:MAX_ENEMIES_PER_LEVEL .byte $00
-TabEnemyBaseCharY				:MAX_ENEMIES_PER_LEVEL .byte $00
+TabEnemyBaseCharX				:MAX_VILLIANS_PER_LEVEL .byte $00
+TabEnemyBaseCharY				:MAX_VILLIANS_PER_LEVEL .byte $00
 
-TabEnemyLevelLeftX_H1			:MAX_ENEMIES_PER_LEVEL .byte $00
-TabEnemyLevelLeftX_H2			:MAX_ENEMIES_PER_LEVEL .byte $00
-TabEnemyLevelTopY_H1			:MAX_ENEMIES_PER_LEVEL .byte $00
-TabEnemyLevelTopY_H2			:MAX_ENEMIES_PER_LEVEL .byte $00
+TabEnemyLevelLeftX_H1			:MAX_VILLIANS_PER_LEVEL .byte $00
+TabEnemyLevelLeftX_H2			:MAX_VILLIANS_PER_LEVEL .byte $00
+TabEnemyLevelTopY_H1			:MAX_VILLIANS_PER_LEVEL .byte $00
+TabEnemyLevelTopY_H2			:MAX_VILLIANS_PER_LEVEL .byte $00
 
-TabEnemyShotLevelLeftX_H1		:MAX_ENEMIES_PER_LEVEL .byte $00
-TabEnemyShotLevelLeftX_H2		:MAX_ENEMIES_PER_LEVEL .byte $00
-TabEnemyShotLevelTopY_H1		:MAX_ENEMIES_PER_LEVEL .byte $00
-TabEnemyShotLevelTopY_H2		:MAX_ENEMIES_PER_LEVEL .byte $00
+TabEnemyShotLevelLeftX_H1		:MAX_VILLIANS_PER_LEVEL .byte $00
+TabEnemyShotLevelLeftX_H2		:MAX_VILLIANS_PER_LEVEL .byte $00
+TabEnemyShotLevelTopY_H1		:MAX_VILLIANS_PER_LEVEL .byte $00
+TabEnemyShotLevelTopY_H2		:MAX_VILLIANS_PER_LEVEL .byte $00
 
 
 ; enemy definition tables (index or type 0 is not used)
