@@ -15,24 +15,29 @@ MAX_VILLIANS_CHARS			= 8
 VilChars					.byte $71, $72, $73, $74 
 							.byte $75, $76, $77, $78
 							
-VilDir						:MAX_VILLIANS	.byte $00
+VilDirX						:MAX_VILLIANS	.byte $00
+VilDirY						:MAX_VILLIANS	.byte $00
+VilDirectionX				:MAX_VILLIANS 	.byte $00
+VilDirectionY				:MAX_VILLIANS 	.byte $00
+VilCollisionX				:MAX_VILLIANS 	.byte $00
+VilCollisionY				:MAX_VILLIANS 	.byte $00
+VilOldCollisionX			:MAX_VILLIANS 	.byte $00
+VilOldCollisionY			:MAX_VILLIANS 	.byte $00
+
 VilDelay					:MAX_VILLIANS	.byte $00
-
 VilState					:MAX_VILLIANS	.byte $00
-
 VilBonus					:MAX_VILLIANS	.byte $00
-
 VilActive					:MAX_VILLIANS	.byte $00
 VilTimers					:MAX_VILLIANS	.byte $00
 
 VilWidth					:MAX_VILLIANS	.byte $00
 VilHeight					:MAX_VILLIANS	.byte $00
 
-VilPosLSB					:MAX_VILLIANS	.byte $00
-VilPosMSB					:MAX_VILLIANS	.byte $00
-
 VilAnimLSB					:MAX_VILLIANS	.byte $00
 VilAnimMSB					:MAX_VILLIANS	.byte $00
+
+VilPosLSB					:MAX_VILLIANS	.byte $00
+VilPosMSB					:MAX_VILLIANS	.byte $00
 
 VilColorLSB					:MAX_VILLIANS	.byte $00
 VilColorMSB					:MAX_VILLIANS	.byte $00
@@ -85,12 +90,6 @@ VilLevelTopY_L1				:MAX_VILLIANS 	.byte $00
 VilLevelBottomY_H1			:MAX_VILLIANS 	.byte $00
 VilLevelBottomY_H2			:MAX_VILLIANS 	.byte $00
 VilLevelBottomY_L1			:MAX_VILLIANS 	.byte $00
-
-m_vilCollisionY				.byte $00
-m_oldCollisionY				.byte $00
-
-m_vilCollisionX				.byte $00
-m_oldCollisionX				.byte $00
 
 m_villianCurrIndex			.byte $FF
 

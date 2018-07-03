@@ -34,9 +34,20 @@
 Continue
 
 		stx m_villianCurrIndex					; hold this index for later
+
+		lda #$01								; set the state value
+		sta VilActive,x
 		
+		lda #PS_OVER_PLATFORM					; set initial state
+		sta VilState,x							; store it off
+
 		lda #PSD_RIGHT							; set initial direction
-		sta VilDir,x							; store it off
+		sta VilDirX,x							; store it off
+		sta VilDirectionX,x						; store it off
+			
+		lda #PSD_DOWN
+		sta VilDirY,x							; store it off
+		sta VilDirectionY,x						; store it off
 		
 		lda #CPY_ANIMATION_DELAY				; set the delay value
 		sta VilDelay,x							; store it off
@@ -44,12 +55,6 @@ Continue
 		lda #CPY_BONUS_AMOUNT					; set the value to 100
 		sta VilBonus,x							; store it off
 
-		lda #CPY_WIDTH							; set the character width
-		sta VilWidth,x							; store it off
-
-		lda #CPY_HEIGHT							; set the character height		
-		sta VilHeight,x							; store it off
-		
 		lda #CPY_TOTAL_FRAMES					; get the total frames
 		sta VilTotalFrame,x						; store it off
 		
@@ -65,27 +70,17 @@ Continue
 		lda #>CPY_WALKDATA						; load the animation
 		sta VilAnimMSB,x						; store it off
 
-		lda #$01								; set the state value
-		sta VilActive,x
-		
-		lda #$01								; set the characters speed
-		sta VilSpeedX_L1,x						; store it off
-		sta VilSpeedX_H1,x						; store it off
-		sta VilSideSpeedX_L1,x					; store it off
-		sta VilSideSpeedX_H1,x					; store it off
-		sta VilSideSpeedAccelX_L1,x				; store it off
-		sta VilSideSpeedAccelX_H1,x				; store it off
-		sta VilSideSpeedDeaccelX_L1,x			; store it off
-		sta VilSideSpeedDeaccelX_H1,x			; store it off
+		lda #CPY_WIDTH							; set the character width
+		sta VilWidth,x							; store it off
 
-		sta VilSpeedY_L1,x						; store it off
-		sta VilSpeedY_H1,x						; store it off
-		sta VilUpDownSpeedY_L1,x				; store it off
-		sta VilUpDownSpeedY_H1,x				; store it off
-		sta VilUpDownSpeedAccelY_L1,x			; store it off
-		sta VilUpDownSpeedAccelY_H1,x			; store it off
-		sta VilUpDownSpeedDeaccelY_L1,x			; store it off
-		sta VilUpDownSpeedDeaccelY_H1,x			; store it off
+		lda #CPY_HEIGHT							; set the character height		
+		sta VilHeight,x							; store it off
+		
+		lda CPY_SPEEDX_L1
+		sta VilSpeedX_L1,x						; store it off
+		
+		lda CPY_SPEEDX_H1
+		sta VilSpeedX_H1,x						; store it off
 
 		lda m_param00							; get the column value
 		sta VilScreenLeftX,x					; store it off
@@ -98,26 +93,55 @@ Continue
 		lda m_paramW03+1						; load level line MSB
 		sta VilPosMSB							; store it off
 
-		lda #$00
-		sta VilState,x							; store it off
-		sta VilOldScreenTopY,x
-		sta VilOldScreenLeftX,x
-				
-		sta VilLevelLeftX_H2,x
-		sta VilLevelLeftX_H1,x
-		sta VilLevelLeftX_L1,x
-		
-		sta VilLevelRightX_H2,x
-		sta VilLevelRightX_H1,x
-		sta VilLevelRightX_L1,x
+		lda #$00								; set the others to zero
+		sta VilTimers,x							; store it off	
+		sta VilCurrFrame,x						; store it off
 
-		sta VilLevelTopY_H2,x
-		sta VilLevelTopY_H1,x
-		sta VilLevelTopY_L1,x
+		sta VilCollisionX,x						; store it off
+		sta VilOldCollisionX,x					; store it off
 		
-		sta VilLevelBottomY_H2,x
-		sta VilLevelBottomY_H1,x
-		sta VilLevelBottomY_L1,x
+		sta VilCollisionY,x						; store it off
+		sta VilOldCollisionY,x					; store it off
+		
+		sta VilSideSpeedX_L1,x					; store it off
+		sta VilSideSpeedX_H1,x					; store it off
+		
+		sta VilSideSpeedAccelX_L1,x				; store it off
+		sta VilSideSpeedAccelX_H1,x				; store it off
+		
+		sta VilSideSpeedDeaccelX_L1,x			; store it off
+		sta VilSideSpeedDeaccelX_H1,x			; store it off
+
+		sta VilSpeedY_L1,x						; store it off
+		sta VilSpeedY_H1,x						; store it off
+
+		sta VilUpDownSpeedY_L1,x				; store it off
+		sta VilUpDownSpeedY_H1,x				; store it off
+		
+		sta VilUpDownSpeedAccelY_L1,x			; store it off
+		sta VilUpDownSpeedAccelY_H1,x			; store it off
+		
+		sta VilUpDownSpeedDeaccelY_L1,x			; store it off
+		sta VilUpDownSpeedDeaccelY_H1,x			; store it off
+
+		sta VilOldScreenTopY,x					; store it off
+		sta VilOldScreenLeftX,x					; store it off
+
+		sta VilLevelLeftX_H2,x					; store it off
+		sta VilLevelLeftX_H1,x					; store it off
+		sta VilLevelLeftX_L1,x					; store it off
+
+		sta VilLevelRightX_H2,x					; store it off
+		sta VilLevelRightX_H1,x					; store it off
+		sta VilLevelRightX_L1,x					; store it off
+
+		sta VilLevelTopY_H2,x					; store it off
+		sta VilLevelTopY_H1,x					; store it off
+		sta VilLevelTopY_L1,x					; store it off
+
+		sta VilLevelBottomY_H2,x				; store it off
+		sta VilLevelBottomY_H1,x				; store it off					
+		sta VilLevelBottomY_L1,x				; store it off
 		
 Exit
 
@@ -145,7 +169,7 @@ Exit
 GetTimer
 		
 		lda VilTimers,x
-		cmp #CPY_ANIMATION_DELAY
+		cmp VilDelay,x
 		beq ResetTimer
 		
 		inc VilTimers,x
@@ -156,16 +180,6 @@ ResetTimer
 		lda #$00
 		sta VilTimers,x
 
-GetFrame			
-		
-;		inc VilCurrFrame,x
-;		lda VilCurrFrame,x
-;		cmp VilTotalFrame,x
-;		bcc GetParams
-
-;		lda #$00		
-;		sta VilCurrFrame,x
-				
 GetParams			
 
 		lda VilScreenTopY,x
@@ -256,18 +270,100 @@ Exit
 
 		ldx m_villianCurrIndex
 		cpx #$FF
-		bne CheckMovement
+		bne CheckDirection
 		jmp Exit
 		
-CheckMovement
+CheckDirection
 
-		lda VilDir,x
-		sta m_oldCollisionX
+		lda #$00
+		sta VilCollisionX,x
 		
-		jsr VillianSideMovement
-				
+		lda VilDirectionX,x
+		
+		cmp #PSD_LEFT		
+		beq SetLeft	
+					
+		cmp #PSD_RIGHT
+		beq SetRight
+		
+SetRight
+						
+		ldx m_villianCurrIndex
+
+		lda #PSD_RIGHT
+		sta VilDirectionX,x
+		
+		jsr VillianGetFontChar		
+		lda m_charDef
+		and #01
+		cmp #CT_BLOCK
+		beq RightDir
+		
+		jmp SetLeft
+		
+RightDir
+
+		ldx m_villianCurrIndex
+		
+		lda #PSD_RIGHT
+		sta VilCollisionX,x
+		
+		lda #PSD_DOWN
+		sta VilCollisionY,x
+		
+		lda VilLevelLeftX_L1,x					; update player side position
+		clc
+		adc #$18	;VilSpeedX_L1,x
+		sta VilLevelLeftX_L1,x
+		
+		lda VilLevelLeftX_H1,x		
+		adc #$00
+		sta VilLevelLeftX_H1,x
+		
+		lda VilLevelLeftX_H2,x
+		adc #$00
+		jmp Exit	
+		
+SetLeft
+		
+		ldx m_villianCurrIndex
+		
+		lda #PSD_LEFT
+		sta VilDirectionX,x
+		
+		jsr VillianGetFontChar		
+		lda m_charDef
+		and #01
+		cmp #CT_BLOCK
+		beq LeftDir
+
+		jmp SetRight
+		
+LeftDir
+		
+		ldx m_villianCurrIndex
+		
+		lda #PSD_LEFT
+		sta VilCollisionX,x
+		
+		lda #PSD_DOWN
+		sta VilCollisionY,x		
+		
+		lda VilLevelLeftX_L1,x	
+		sec
+		sbc #$18	;VilSpeedX_L1,x
+		sta VilLevelLeftX_L1,x
+		
+		lda VilLevelLeftX_H1,x
+		sbc #$00
+		sta VilLevelLeftX_H1,x
+		
+		lda VilLevelLeftX_H2,x
+		sbc #$00
+		sta VilLevelLeftX_H2,x				
 Exit
 
+		jsr VillianSetScreenPos
 		rts
 		
 .endp

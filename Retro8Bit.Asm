@@ -420,11 +420,27 @@ Loop
 
 		inx
 		cpx #$10
-		bne Loop
+		bne Loop		
+		
+		lda m_playerScreenLeftX
+		ldy #64
+		jsr DisplayDebugInfoHexFF
+
+		lda VilCollisionX
+		ldy #67
+		jsr DisplayDebugInfoHexFF
+		
+		lda VilCollisionY
+		ldy #70
+		jsr DisplayDebugInfoHexFF
 		
 		ldx #$00
-		lda VilState,x
-		ldy #70
+		lda VilScreenLeftX,x
+		ldy #73
+		jsr DisplayDebugInfoHexFF
+
+		lda VilScreenTopY,x
+		ldy #76
 		jsr DisplayDebugInfoHexFF
 		
 .endif

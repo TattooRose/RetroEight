@@ -67,11 +67,11 @@ AddSpeedToPosition
 		sta VilLevelLeftX_H2,x
 
 		lda #0									; check collisions for a player moving to the right	
-		sta VilState,x
+		sta VilCollisionX
 
 		jsr VillianCheckRightCollision
 
-		lda m_vilCollisionX
+		lda VilCollisionX
 		beq Exit
 
 FoundCollision
@@ -107,34 +107,32 @@ Exit
 		
 CheckCollision
 
+		lda #$00
+		sta VilCollisionY
+
 		lda VilWidth,x							; get the width
 		sta m_vars00							; hold it
 		dec m_vars00							; minus one for calcs below
 
-		lda VilHeight,x							; get the height
-		sta m_vars01							; hold it
-		dec m_vars01							; minus one for calcs below
-				
-		lda VilLevelBottomY_H2,x				; get bottom char line
-		sta m_charBuffer_H2						; store it off		
-		lda VilLevelBottomY_H1,x				; get bottom char
-		lsr m_charBuffer_H2						; divide by /2
-		ror										; rotate right
-		lsr m_charBuffer_H2						; divide by /4
-		ror										; rotate right
-		lsr m_charBuffer_H2						; divide by /8 = CHAR_PIXELS_Y
-		ror										; rotate right	
+		; get bottom char line
+		lda VilLevelBottomY_H2,x
+		sta m_charBuffer_H2
+		lda VilLevelBottomY_H1,x
+		lsr m_charBuffer_H2						; /2
+		ror
+		lsr m_charBuffer_H2						; /4
+		ror
+		lsr m_charBuffer_H2						; /8 = CHAR_PIXELS_Y
+		ror
+		tax
+		lda TabLevelLineAddressLSB,x
+		sta m_ptrLevelLine
+		lda TabLevelLineAddressMSB,x
+		sta m_ptrLevelLine+1
 
-		tax			
-		inx										; move to x for the level line
-		lda TabLevelLineAddressLSB,x			; get the LSB level line
-		sta m_ptrLevelLine						; store it to zero page
-		lda TabLevelLineAddressMSB,x			; get the MSB level line
-		sta m_ptrLevelLine+1					; store it to zero page	
-
+		; update right coordinate
 		ldx m_villianCurrIndex					; reset x to the index
-
-		lda VilLevelLeftX_H1,x					; update right coordinate
+		lda VilLevelLeftX_H1,x
 		clc
 		adc m_vars00
 		sta VilLevelRightX_H1,x
@@ -142,23 +140,23 @@ CheckCollision
 		adc #0
 		sta VilLevelRightX_H2,x
 
-		lda VilLevelLeftX_H2,x					; get left point char column
+		; get left point char column
+		lda VilLevelLeftX_H2,x
 		sta m_charBuffer_H2
 		lda VilLevelLeftX_H1,x
 		lsr m_charBuffer_H2						; /2
 		ror
 		lsr m_charBuffer_H2						; /4 = CHAR_PIXELS_X
 		ror
-
 		tay
 		lda (m_ptrLevelLine),y
 		tax
 		lda TabCharDefinition,x
 		sta m_leftBottomChar
-
+		
+		; get right point char column
 		ldx m_villianCurrIndex					; reset x to the index
-
-		lda VilLevelRightX_H2,x					; get right point char column
+		lda VilLevelRightX_H2,x
 		sta m_charBuffer_H2
 		lda VilLevelRightX_H1,x
 		lsr m_charBuffer_H2						; /2
@@ -176,15 +174,15 @@ CheckCollision
 		lda m_leftBottomChar
 		and #01
 		cmp #CT_BLOCK
-		bne CPBC_check_next_char
+		bne CheckNextChar
 
 		lda m_leftBottomChar
 		and #%00010000
-		bne CPBC_found_collision
+		bne FoundCollision
 
 ;************************************************
 ;
-CPBC_check_next_char
+CheckNextChar
 
 		lda m_rightBottomChar
 		and #01
@@ -197,13 +195,13 @@ CPBC_check_next_char
 
 ;************************************************
 ;
-CPBC_found_collision
+FoundCollision
 
 		ldx m_villianCurrIndex					; reset x to the index
 
 		; need to move the player up and change to the platform state
 		lda #$01
-		sta VilState,x
+		sta VilCollisionY
 
 		lda #0
 		sta VilLevelBottomY_L1,x
@@ -333,7 +331,7 @@ CheckNextChar
 FoundCollision
 
 		lda #1
-		sta m_vilCollisionX
+		sta VilCollisionX
 
 		ldx m_villianCurrIndex
 		lda #$00									; need to move the player to the right
@@ -371,9 +369,12 @@ Exit
 
 CheckCollision
 
-		lda #$00
-		sta m_oldCollisionX
+		lda VilCollisionX
+		sta VilOldCollisionX
 		
+		lda #$00
+		sta VilCollisionX
+
 		lda VilWidth,x
 		sta m_vars00
 		dec m_vars00
@@ -483,7 +484,7 @@ FoundCollision
 		ldx m_villianCurrIndex
 		
 		lda #1
-		sta m_oldCollisionX
+		sta VilCollisionX
 
 		lda #0									; need to move the player to the left
 		sta VilLevelLeftX_L1,x
@@ -522,7 +523,7 @@ Exit
 		
 		lda #$00
 
-		sta VilDir,x						
+		sta VilDirX,x						
 		sta VilActive,x
 		sta VilTimers,x
 
@@ -588,14 +589,20 @@ Exit
 		cpx #$FF
 		beq Exit
 
+;*****	Check Direction
+;
+		lda VilCollisionX
+		cmp #PSD_RIGHT
+		beq CheckRight
+
 ;******	Check Deaccel Right
 ;
 CheckDeaccelRight
 	
-		lda m_oldCollisionX
+		lda VilCollisionX
 		cmp #PSD_RIGHT
 		bne CheckDeaccelLeft
-
+		
 		jsr VillianSubstractDeaccelToSpeedX
 		jsr VillianAddSpeedToPositionX
 		jmp Exit
@@ -620,10 +627,11 @@ Deaccel
 ;
 CheckRight
 
-		lda m_oldCollisionX
+		lda VilCollisionX
 		cmp #PSD_LEFT
+		beq CheckLeft
 		bne MoveToRight
-
+		
 		lda #$00
 		sta VilSpeedX_L1,x
 		sta VilSpeedX_H1,x
@@ -633,17 +641,16 @@ CheckRight
 MoveToRight
 
 		lda #PSD_RIGHT
-		sta m_oldCollisionX
+		sta VilCollisionX
 		jsr VillianAddAccelToSpeedX
 		jsr VillianAddSpeedToPositionX
 		jmp Exit
-
 
 ;***** Check Left
 ;
 CheckLeft
 	
-		lda m_oldCollisionX
+		lda VilCollisionX
 		cmp #PSD_RIGHT
 		bne MoveToLeft
 
@@ -656,7 +663,7 @@ CheckLeft
 MoveToLeft
 	
 		lda #PSD_LEFT
-		sta m_oldCollisionX
+		sta VilCollisionX
 		jsr VillianAddAccelToSpeedX
 		jsr VillianSubstractSpeedToPositionX
 
@@ -710,24 +717,26 @@ Exit
 		cpx #$FF
 		beq Exit
 
-		lda VilWidth,x
-		sta m_param00
-		
 		; get front point char column
-		lda VilDir,x
-		cmp #1
+		lda VilDirectionX,x
+		cmp #PSD_RIGHT
 		bne CheckLeft
 
 ;*****	Check right character
 ;
 CheckRight
-			
-		dec m_param00							; Enemy width minus one
+				 
+		ldx m_villianCurrIndex
 		
+;		lda VilWidth,x
+;		sta m_param00
+;		dec m_param00							; Enemy width minus one
+;		
 		clc
 		lda VilLevelLeftX_H1,x
-		adc m_param00
+		adc #$02
 		sta m_pixelPositionX_H1
+
 		lda VilLevelLeftX_H2,x
 		adc #$00
 		sta m_pixelPositionX_H2
@@ -738,26 +747,32 @@ CheckRight
 ;
 CheckLeft
 
+		ldx m_villianCurrIndex
+
+		sec
 		lda VilLevelLeftX_H1,x
-		sta m_pixelPositionX_H1
-		
+		sbc #$03
+		sta m_pixelPositionX_H1		
+
 		lda VilLevelLeftX_H2,x
+		sbc #$00
 		sta m_pixelPositionX_H2
 
 ;*****	Check middle character
 ;
 CheckMiddle
 
+		ldx m_villianCurrIndex
 		clc
 		lda VilLevelBottomY_H1,x
 		adc #$01
 		sta m_pixelPositionY_H1
+
 		lda VilLevelBottomY_H2,x
 		adc #0
 		sta m_pixelPositionY_H2
 
-		jsr VillianGetCharFromPixelPos
-		
+		jsr VillianGetCharFromPixelPos		
 	
 Exit
 
@@ -798,10 +813,10 @@ Exit
 		lda TabLevelLineAddressMSB,y
 		sta CharPointer+2
 		sta m_lineAddressMSB
-
-		; get char column, divide by 4 (put in Y)
-		lda m_pixelPositionX_H2
+		
+		lda m_pixelPositionX_H2					; get char column, divide by 4 (put in Y)
 		sta m_charBuffer_H2
+
 		lda m_pixelPositionX_H1
 		lsr m_charBuffer_H2						; /2
 		ror
@@ -810,18 +825,7 @@ Exit
 
 		sta m_charPositionX
 		tay
-
-		ldx m_villianCurrIndex
-		lda VilDir,x
-		cmp #PSD_RIGHT
-		bne CheckLeft
-		iny
-		jmp CharPointer
 		
-CheckLeft
-		
-		dey
-
 CharPointer
 		
 		lda $FFFF,y
@@ -830,6 +834,8 @@ CharPointer
 		tay
 		lda TabCharDefinition,y
 		sta m_charDef
+
+Exit
 
 		rts
 
@@ -1234,11 +1240,11 @@ Exit
 CheckLeftCollision
 		
 		lda #$00
-		sta m_vilCollisionX
+		sta VilCollisionX
 
 		jsr VillianCheckLeftCollision
 
-		lda m_vilCollisionX
+		lda VilCollisionX
 		beq Exit
 
 ;*****	Found Collision
@@ -1275,16 +1281,15 @@ Loop
 		ldx m_villianCurrIndex
 		lda VilActive,x
 		cmp #$01
-		beq PositionEnemy
-		jmp NextEnemy		
+		beq PositionVillian
+		jmp NextVillian		
 
-PositionEnemy
+PositionVillian
 
 		jsr VillianSetSpawnPos
-		jsr VillianSetInfo
 		jsr VillianSetScreenPos
 
-DrawEnemy
+DrawVillian
 
 		ldx m_villianCurrIndex
 		lda EnemyDrawLSB,x
@@ -1292,15 +1297,16 @@ DrawEnemy
 		lda EnemyDrawMSB,x
 		sta m_paramW00+1
 		
-		lda #>(NextEnemy - 1)					; LSB for the set up stack to act like a JSR
+		lda #>(NextVillian - 1)					; LSB for the set up stack to act like a JSR
 		pha										; push a simulated return LSB address
-		lda #<(NextEnemy - 1)					; MSB for the set up stack to act like a JSR 
+		lda #<(NextVillian - 1)					; MSB for the set up stack to act like a JSR 
 		pha										; push a simulated return MSB address
 
 		jmp (m_paramW00)	
 								
-NextEnemy
+NextVillian
 
+		ldx m_villianCurrIndex
 		inx
 		stx m_villianCurrIndex
 		cpx #MAX_VILLIANS
