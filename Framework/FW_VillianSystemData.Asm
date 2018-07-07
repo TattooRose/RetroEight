@@ -12,9 +12,17 @@
 ;
 MAX_VILLIANS_CHARS			= 8
 
-VilChars					.byte $71, $72, $73, $74 
-							.byte $75, $76, $77, $78
+VilChars					.byte $70, $71, $72, $73 
+							.byte $74, $75, $76, $77
 							
+VilLines					.byte $00, $06, $06, $0D
+							.byte $0D, $13, $13, $19 							
+							
+VilTypeId					:MAX_VILLIANS	.byte $00
+							
+VilPositionX				:MAX_VILLIANS	.byte $00
+VilPositionY				:MAX_VILLIANS	.byte $00
+
 VilDirX						:MAX_VILLIANS	.byte $00
 VilDirY						:MAX_VILLIANS	.byte $00
 VilDirectionX				:MAX_VILLIANS 	.byte $00
@@ -33,11 +41,14 @@ VilTimers					:MAX_VILLIANS	.byte $00
 VilWidth					:MAX_VILLIANS	.byte $00
 VilHeight					:MAX_VILLIANS	.byte $00
 
-VilAnimLSB					:MAX_VILLIANS	.byte $00
-VilAnimMSB					:MAX_VILLIANS	.byte $00
-
 VilPosLSB					:MAX_VILLIANS	.byte $00
 VilPosMSB					:MAX_VILLIANS	.byte $00
+
+VilMoveLSB					:MAX_VILLIANS	.byte $00
+VilMoveMSB					:MAX_VILLIANS	.byte $00
+
+VilAnimLSB					:MAX_VILLIANS	.byte $00
+VilAnimMSB					:MAX_VILLIANS	.byte $00
 
 VilColorLSB					:MAX_VILLIANS	.byte $00
 VilColorMSB					:MAX_VILLIANS	.byte $00
@@ -91,6 +102,8 @@ VilLevelBottomY_H1			:MAX_VILLIANS 	.byte $00
 VilLevelBottomY_H2			:MAX_VILLIANS 	.byte $00
 VilLevelBottomY_L1			:MAX_VILLIANS 	.byte $00
 
+m_villianTypeId				.byte $00
+m_villianDliIndex			.byte $00
 m_villianCurrIndex			.byte $FF
 
 

@@ -46,7 +46,19 @@ GameDli_01
 .endif
 		
 		SetFontAddress GameFontAddress
+		
+		;lda VCOUNT
+		;sta m_villianDliIndex
+
+
+;		sta m_hldA
+;		stx m_hldX
+
+		VillianDli $00, $06
     	sta WSYNC   			; Wait off-screen
+				
+;		ldx m_hldX
+;		lda m_hldA
 
 		
 		SetDisplayListInterrupt GameDli_02 
@@ -68,6 +80,33 @@ GameDli_02
 		tya
 		pha
 
+;.if PAL_VERSION = 0
+;
+;		SetColor $00, $03, $04
+;		SetColor $01, $0E, $0F
+;		SetColor $02, $0E, $08
+;		SetColor $03, $0F, $0C		
+;		
+;.else
+;
+;		SetColor 1, 15, 14		; yellow (collectables)
+;		SetColor 2, 7, 2		; blue (water)
+;
+;.endif
+;
+;		sta m_hldA
+;		stx m_hldX
+		
+		VillianDli $06, $0C
+		
+;		ldx m_hldX
+;		lda m_hldA
+				
+;		lda VCOUNT
+;		ldy #76
+;		jsr DisplayDebugInfoHexFF
+
+		
     	sta WSYNC   			; Wait off-screen
 		
 		SetDisplayListInterrupt GameDli_03 
@@ -89,8 +128,27 @@ GameDli_03
 		tya
 		pha
 
-    	sta WSYNC   			; Wait off-screen
+.if PAL_VERSION = 0
+
+		SetColor $00, $03, $04
+		SetColor $01, $0E, $0F
+		SetColor $02, $0A, $08
+		SetColor $03, $0F, $0C		
 		
+.else
+
+		SetColor 1, 15, 14		; yellow (collectables)
+		SetColor 2, 7, 2		; blue (water)
+
+.endif
+
+		;lda VCOUNT
+		;sta m_villianDliIndex
+
+
+		VillianDli $0C, $12
+		
+    	sta WSYNC   			; Wait off-screen
 		SetDisplayListInterrupt GameDli_04 
 
 		pla
@@ -111,6 +169,25 @@ GameDli_04
 		tya
 		pha
 
+.if PAL_VERSION = 0
+
+		SetColor $00, $04, $0F
+		SetColor $01, $01, $0F
+		SetColor $02, $08, $0F
+		SetColor $03, $0B, $0F		
+		
+.else
+
+		SetColor 1, 15, 14		; yellow (collectables)
+		SetColor 2, 7, 2		; blue (water)
+
+.endif
+
+
+		;lda VCOUNT
+		;sta m_villianDliIndex
+
+		VillianDli $12, $18
     	sta WSYNC   			; Wait off-screen
 		
 		SetDisplayListInterrupt TextDli 
@@ -143,6 +220,10 @@ TextDli
 		SetColor 2, 7, 2		; blue (water)
 
 .endif
+;		lda VCOUNT
+;		ldy #76
+;		jsr DisplayDebugInfoHexFF
+
 		SetFontAddress TextFontAddress
 		STA WSYNC 				;Wait off-screen
 

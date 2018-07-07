@@ -58,17 +58,23 @@ Continue
 		lda #CPY_TOTAL_FRAMES					; get the total frames
 		sta VilTotalFrame,x						; store it off
 		
-		lda #<CPY_WALKCOLORS						; load the colors
-		sta VilColorLSB,x						; store it off
+		lda #<CPY_WALKDATA						; load the animation
+		sta VilAnimLSB,x						; store it off
 
-		lda #>CPY_WALKCOLORS						; load the colors
-		sta VilColorMSB,x						; store it off
+		lda #>CPY_WALKDATA						; load the animation
+		sta VilAnimMSB,x						; store it off
 
 		lda #<CPY_WALKDATA						; load the animation
 		sta VilAnimLSB,x						; store it off
 
 		lda #>CPY_WALKDATA						; load the animation
 		sta VilAnimMSB,x						; store it off
+
+		lda #<CPY_WALKCOLORS					; load the colors
+		sta VilColorLSB,x						; store it off
+
+		lda #>CPY_WALKCOLORS					; load the colors
+		sta VilColorMSB,x						; store it off
 
 		lda #CPY_WIDTH							; set the character width
 		sta VilWidth,x							; store it off
@@ -83,9 +89,11 @@ Continue
 		sta VilSpeedX_H1,x						; store it off
 
 		lda m_param00							; get the column value
+		sta VilPositionX,x
 		sta VilScreenLeftX,x					; store it off
 		
 		lda m_param01							; get the row value
+		sta VilPositionY,x
 		sta VilScreenTopY,x						; store it off
 		
 		lda m_paramW03							; load level line LSB
@@ -197,18 +205,18 @@ GetParams
 		ldx #$00		
 		lda #$00
 		
-ClearPlayer
-
-		sta p2_area_1,y	
-		iny
-		inx
-		cpx m_vars01
-		bne ClearPlayer
+;ClearPlayer
+;
+;		sta p2_area_1,y	
+;		iny
+;		inx
+;		cpx m_vars01
+;		bne ClearPlayer
 		
 		ldx m_villianCurrIndex
 
-		lda VilScreenLeftX,x
-		sta HPOSP2
+		;lda VilScreenLeftX,x
+		;sta HPOSP2
 		
 		lda VilColorLSB,x
 		sta Color00+1
@@ -270,100 +278,34 @@ Exit
 
 		ldx m_villianCurrIndex
 		cpx #$FF
-		bne CheckDirection
-		jmp Exit
-		
-CheckDirection
-
-		lda #$00
-		sta VilCollisionX,x
-		
-		lda VilDirectionX,x
-		
-		cmp #PSD_LEFT		
-		beq SetLeft	
+		beq Exit
 					
-		cmp #PSD_RIGHT
-		beq SetRight
+		jsr VillianSideMoveContained			; do the side movement within the platform 
 		
-SetRight
-						
-		ldx m_villianCurrIndex
+SetScreemPos
 
-		lda #PSD_RIGHT
-		sta VilDirectionX,x
-		
-		jsr VillianGetFontChar		
-		lda m_charDef
-		and #01
-		cmp #CT_BLOCK
-		beq RightDir
-		
-		jmp SetLeft
-		
-RightDir
-
-		ldx m_villianCurrIndex
-		
-		lda #PSD_RIGHT
-		sta VilCollisionX,x
-		
-		lda #PSD_DOWN
-		sta VilCollisionY,x
-		
-		lda VilLevelLeftX_L1,x					; update player side position
-		clc
-		adc #$18	;VilSpeedX_L1,x
-		sta VilLevelLeftX_L1,x
-		
-		lda VilLevelLeftX_H1,x		
-		adc #$00
-		sta VilLevelLeftX_H1,x
-		
-		lda VilLevelLeftX_H2,x
-		adc #$00
-		jmp Exit	
-		
-SetLeft
-		
-		ldx m_villianCurrIndex
-		
-		lda #PSD_LEFT
-		sta VilDirectionX,x
-		
-		jsr VillianGetFontChar		
-		lda m_charDef
-		and #01
-		cmp #CT_BLOCK
-		beq LeftDir
-
-		jmp SetRight
-		
-LeftDir
-		
-		ldx m_villianCurrIndex
-		
-		lda #PSD_LEFT
-		sta VilCollisionX,x
-		
-		lda #PSD_DOWN
-		sta VilCollisionY,x		
-		
-		lda VilLevelLeftX_L1,x	
-		sec
-		sbc #$18	;VilSpeedX_L1,x
-		sta VilLevelLeftX_L1,x
-		
-		lda VilLevelLeftX_H1,x
-		sbc #$00
-		sta VilLevelLeftX_H1,x
-		
-		lda VilLevelLeftX_H2,x
-		sbc #$00
-		sta VilLevelLeftX_H2,x				
+		jsr VillianSetScreenPos					; update the screen position with the values
+				
 Exit
 
-		jsr VillianSetScreenPos
 		rts
 		
 .endp
+
+;
+;***************************************************************************************************
+;	CreepyState
+;
+;		Determine the current state of the creepy villian
+;
+;		uses:			m_villianCurrIndex	-	Index value to work against
+;
+;***************************************************************************************************
+;
+.proc CreepyState
+
+Exit
+
+		rts
+
+.endp`

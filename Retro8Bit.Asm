@@ -159,8 +159,8 @@ RetroLoop
 
 ;*****	Start Game Play Setup
 ;
-		lda #$00								; Turn off screen related functions	
-		sta SDMCTL								; store it
+		;lda #$00								; Turn off screen related functions	
+		;sta SDMCTL								; store it
 
 ;*****	Memory Settings
 ;
@@ -182,6 +182,8 @@ RetroLoop
 		SetDisplayListInterrupt GameDli_01		; set the display list interrupts
 		VcountWait 120
 
+		SetVerticalBlank VBI $06
+		
 ;*****	Display List, Font, PM addresses
 ;		
 		SetDisplayListAddress CommDspListAddr	; set the display list address
@@ -214,10 +216,11 @@ RetroLoop
 		jsr SetSpawnPos
 		
 		VCountWait 120
+				
 		
 ;*****	Initalize Level Components
 ;
-		jsr VillianInitSystem		
+		jsr VillianSystemInit		
 		jsr VilliansInit
 		
 		jsr InitEnemyManager
@@ -225,6 +228,32 @@ RetroLoop
 		
 		jsr InitPlatforms
 		jsr InitObjectCounters
+		
+;		ldy #$08
+;		ldx #$00
+;				
+;SeedVillians
+;		
+;		stx m_villianCurrIndex	
+;		lda VilActive,x
+;		cmp #$01
+;		bne IncX
+;		 
+;		sty m_saveRegY 	
+;		jsr VilliansUpdate
+;		ldy m_saveRegY
+;
+;IncX		
+;		
+;		inx
+;		cpx #MAX_VILLIANS
+;		bne IncY
+;		
+;		ldx #$00		
+;IncY		
+;
+;		dey
+;		bpl SeedVillians
 		
 		VcountWait 120
 		
@@ -239,25 +268,25 @@ RetroLoop
 		lda #0									; set the VSCROL value
 		sta VSCROL								; store it
 
-		lda #GRACTL_OPTIONS						; apply GRACTL options
-		sta GRACTL								; store it
-
-		lda #PRIOR_OPTIONS						; apply PRIOR options
-		sta PRIOR								; store it
-
 		lda #0									; clear the hit register
 		sta HITCLR								; store it
-
-		lda #[NMI_DLI]							; enable DLI's	
-		sta NMIEN								; store it
-	    sta IRQEN
-	    
-		cli										; enable interrupts		
 
 		lda #DMACTL_OPTIONS						; apply DMACTL options
 		sta DMACTL								; store it
 
-		VcountWait 120
+		lda #GRACTL_OPTIONS						; apply GRACTL options
+		sta GRACTL								; store it
+;
+		lda #PRIOR_OPTIONS						; apply PRIOR options
+		sta PRIOR								; store it
+;
+
+		lda #[NMI_DLI + NMI_VBI]				; enable DLI's	
+		sta NMIEN								; store it
+    	STA POKMSK
+	    sta IRQEN
+
+		cli										; enable interrupts		
 
 		rts
 
@@ -280,6 +309,7 @@ StartLevel
 ;*****	Main target label for looping
 ;
 Loop		
+
 		lda m_stick0
 		and #$0F
 		cmp #$0F
@@ -335,29 +365,32 @@ PlayerNormalStates
 ;
 EnemyUpdate
 
-		jsr VilliansUpdate
+		jsr UpdateMissileSystem
 		jsr UpdateEnemyManager
-	
+		jsr VilliansUpdate
+		
+		
 ;*****	MissilesStep
 ;
 MissilesStep
 
-		jsr UpdateMissileSystem
 		jsr DrawEnemyExplosion
 	
 ;*****	GameAnimations
 ;
 GameAnimations
-	
+
+		;jsr SfxUpdate
+		
 		jsr AnimatePlatformH		
 		jsr DoFontAnimations
 		jsr UpdateCoinAnimations
 		jsr UpdateInfoLine
-		jsr SfxUpdate
+		
 				
 		VcountWait 120
-		
-		jsr CheckPMCollisions		
+
+		jsr CheckPMCollisions				
 		jsr DebugInfo
 		
 		lda m_disableGameTimer	
@@ -373,14 +406,13 @@ PlayerEndStates
 		and #$0F
 		sta m_sfxEffect
 
+		;jsr SfxUpdate
 		jsr AnimatePlatformH		
 		jsr DrawPlayerExplosion
 		jsr DoFontAnimations
 		jsr UpdateCoinAnimations
-		jsr UpdateMissileSystem
 		jsr DrawEnemyExplosion
 		jsr UpdateInfoLine
-		jsr SfxUpdate
 		jsr DebugInfo				
 
 		VcountWait 120
@@ -396,6 +428,15 @@ Exit
 		jsr SfxInit
 		rts		
 .endp
+
+
+VBI		
+		lda #[NMI_DLI + NMI_VBI]				; enable DLI's	
+		sta NMIEN								; store it
+		
+		jsr SfxUpdate
+		
+		jmp XITVB		
 
 ;
 ;**************************************************************************************************
@@ -426,21 +467,17 @@ Loop
 		ldy #64
 		jsr DisplayDebugInfoHexFF
 
-		lda VilCollisionX
+		lda m_playerScreenTopY
 		ldy #67
-		jsr DisplayDebugInfoHexFF
-		
-		lda VilCollisionY
-		ldy #70
 		jsr DisplayDebugInfoHexFF
 		
 		ldx #$00
 		lda VilScreenLeftX,x
-		ldy #73
+		ldy #70
 		jsr DisplayDebugInfoHexFF
 
 		lda VilScreenTopY,x
-		ldy #76
+		ldy #73
 		jsr DisplayDebugInfoHexFF
 		
 .endif
@@ -478,7 +515,7 @@ Loop
 ;
 ENDOFCODE
 .PRINT "End of Code: ", ENDOFCODE
-.if ENDOFCODE > $9000
+.if ENDOFCODE > $9FFF
 	.error "Code exceeds alloted area!"
 .endif		
 

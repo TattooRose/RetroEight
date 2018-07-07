@@ -11,6 +11,39 @@
 ;***************************************************************************************************
 ;
 
+.macro VillianDli
+
+		stx m_hldX
+		sty m_hldY
+		
+		ldx #$07
+loop
+
+		lda VilActive,x
+		cmp #$01
+		bne NextX
+		
+		lda VilPositionY,x
+		cmp #:1
+		bcc NextX
+		cmp #:2
+		bcs NextX
+		
+		lda VilScreenLeftX,x
+		sta HPOSP2
+		
+		sta WSYNC
+
+NextX
+
+		dex
+		bpl	loop
+		
+		ldx m_hldX
+		ldy m_hldY
+		
+.endm
+
 ;
 ;**************************************************************************************************
 ; SaveAXY
@@ -21,6 +54,19 @@
 	txa
 	pha
 	tya
+	pha
+.endm
+
+;
+;**************************************************************************************************
+; RestoreAXY
+;**************************************************************************************************
+;
+.macro RestoreAXY
+	pla
+	tay
+	pla
+	tax
 	pha
 .endm
 

@@ -323,7 +323,7 @@ DPE_update_frame
 		sta HPOSP0
 		sta HPOSP1
 		
-		VcountWait 120
+		;VcountWait 120
 		
 		lda m_currLevelNum
 		sta m_param00

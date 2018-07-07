@@ -2,27 +2,35 @@ MAX_VILLIANS					= 8
 
 ;
 ;**************************************************************************************************
-; 	Enemy Initialize Methods
+; 	Villian Draw Methods
 ;**************************************************************************************************
 ;
-EnemyInitLSB				.byte <CreepyInit, $FF, $FF, $FF, $FF, $FF, $FF, $FF
-EnemyInitMSB				.byte >CreepyInit, $FF, $FF, $FF, $FF, $FF, $FF, $FF
+VillianAnimLSB				.byte <CreepyDraw, $FF, $FF, $FF, $FF, $FF, $FF, $FF
+VillianAnimMSB				.byte >CreepyDraw, $FF, $FF, $FF, $FF, $FF, $FF, $FF 						
 
 ;
 ;**************************************************************************************************
-; 	Enemy Move Methods
+; 	Villian Initialize Methods
 ;**************************************************************************************************
 ;
-EnemyMoveLSB				.byte <CreepyMove, $FF, $FF, $FF, $FF, $FF, $FF, $FF
-EnemyMoveMSB				.byte >CreepyMove, $FF, $FF, $FF, $FF, $FF, $FF, $FF 						
+VillianInitLSB				.byte <CreepyInit, $FF, $FF, $FF, $FF, $FF, $FF, $FF
+VillianInitMSB				.byte >CreepyInit, $FF, $FF, $FF, $FF, $FF, $FF, $FF
 
 ;
 ;**************************************************************************************************
-; 	Enemy Draw Methods
+; 	Villian Move Methods
 ;**************************************************************************************************
 ;
-EnemyDrawLSB				.byte <CreepyDraw, $FF, $FF, $FF, $FF, $FF, $FF, $FF
-EnemyDrawMSB				.byte >CreepyDraw, $FF, $FF, $FF, $FF, $FF, $FF, $FF 						
+VillianMoveLSB				.byte <CreepyMove, $FF, $FF, $FF, $FF, $FF, $FF, $FF
+VillianMoveMSB				.byte >CreepyMove, $FF, $FF, $FF, $FF, $FF, $FF, $FF 						
+
+;
+;**************************************************************************************************
+; 	Villian State Methods
+;**************************************************************************************************
+;
+VillianStateLSB				.byte <CreepyState, $FF, $FF, $FF, $FF, $FF, $FF, $FF
+VillianStateMSB				.byte >CreepyState, $FF, $FF, $FF, $FF, $FF, $FF, $FF 						
 
 ;
 ;**************************************************************************************************

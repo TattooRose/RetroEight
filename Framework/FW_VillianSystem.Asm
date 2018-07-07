@@ -506,7 +506,6 @@ Exit
 
 .endp
 
-
 ;
 ;***************************************************************************************************
 ;	VillianClear
@@ -519,58 +518,93 @@ Exit
 .proc VillianClear
 
 		cpx MAX_VILLIANS							; Check if the X index is valid
-		bcs Exit								; No then get the hell out
+		bcc InitVillian
+		jmp Exit									; No then get the hell out		
+
+InitVillian
 		
 		lda #$00
+		sta VilPositionX,x
+		sta VilPositionY,x
 
-		sta VilDirX,x						
+		sta VilDirX,x
+		sta VilDirY,x
+		sta VilDirectionX,x
+		sta VilDirectionY,x
+		
+		sta VilCollisionX,x
+		sta VilCollisionY,x
+		sta VilOldCollisionX,x			
+		sta VilOldCollisionY,x
+
+		
+		sta VilDelay,x
+		sta VilState,x
+		sta VilBonus,x
 		sta VilActive,x
 		sta VilTimers,x
+		sta VilTypeId,x
+				
+		sta VilWidth,x
+		sta VilHeight,x
 
-		sta VilDelay,x					
-		sta VilState,x					
-		sta VilBonus,x					
+		sta VilAnimLSB,x
+		sta VilAnimMSB,x
 
-		sta VilWidth,x					
-		sta VilHeight,x					
+		sta VilPosLSB,x
+		sta VilPosMSB,x
 
-		sta VilAnimLSB,x				
-		sta VilAnimMSB,x				
+		sta VilColorLSB,x
+		sta VilColorMSB,x
 
-		sta VilColorLSB,x				
-		sta VilColorMSB,x				
+		sta VilCurrFrame,x
+		sta VilTotalFrame,x
 
-		sta VilTotalFrame,x				
+		sta VilSpeedX_L1,x
+		sta VilSpeedX_H1,x
 
-		sta VilCurrFrame,x			
+		sta VilSideSpeedX_L1,x
+		sta VilSideSpeedX_H1,x
 
-		sta VilSpeedX_H1,x		
-		sta VilSpeedX_L1,x		
+		sta VilSideSpeedAccelX_L1,x
+		sta VilSideSpeedAccelX_H1,x
 
-		sta VilSpeedY_H1,x		
-		sta VilSpeedY_L1,x		
+		sta VilSideSpeedDeaccelX_L1,x
+		sta VilSideSpeedDeaccelX_H1,x
 
-		sta VilScreenTopY,x		
-		sta VilOldScreenTopY,x	
+		sta VilSpeedY_L1,x
+		sta VilSpeedY_H1,x
 
-		sta VilScreenLeftX,x		
-		sta VilOldScreenLeftX,x	
+		sta VilUpDownSpeedY_L1,x
+		sta VilUpDownSpeedY_H1,x			
 
-		sta VilLevelLeftX_H2,x	
-		sta VilLevelLeftX_H1,x	
-		sta VilLevelLeftX_L1,x	
+		sta VilUpDownSpeedAccelY_L1,x
+		sta VilUpDownSpeedAccelY_H1,x
 
-		sta VilLevelRightX_H2,x	
-		sta VilLevelRightX_H1,x	
-		sta VilLevelRightX_L1,x	
+		sta VilUpDownSpeedDeaccelY_L1,x
+		sta VilUpDownSpeedDeaccelY_H1,x
 
-		sta VilLevelTopY_H2,x	
-		sta VilLevelTopY_H1,x	
-		sta VilLevelTopY_L1,x	
+		sta VilScreenTopY,x
+		sta VilOldScreenTopY,x
 
-		sta VilLevelBottomY_H2,x	
-		sta VilLevelBottomY_H1,x	
-		sta VilLevelBottomY_L1,x	
+		sta VilScreenLeftX,x
+		sta VilOldScreenLeftX,x
+
+		sta VilLevelLeftX_H1,x
+		sta VilLevelLeftX_H2,x
+		sta VilLevelLeftX_L1,x
+
+		sta VilLevelRightX_H1,x
+		sta VilLevelRightX_H2,x
+		sta VilLevelRightX_L1,x
+
+		sta VilLevelTopY_H1,x
+		sta VilLevelTopY_H2,x
+		sta VilLevelTopY_L1,x
+
+		sta VilLevelBottomY_H1,x
+		sta VilLevelBottomY_H2,x
+		sta VilLevelBottomY_L1,x
 
 Exit
 
@@ -843,13 +877,13 @@ Exit
 
 ;
 ;***************************************************************************************************
-;	VillianInitSystem
+;	VillianSystemInit
 ;
 ;		Loop to number of max enemies and clear the data.
 ;
 ;***************************************************************************************************
 ;
-.proc VillianInitSystem
+.proc VillianSystemInit
 
 		ldx #LEVEL_CHAR_SIZE_X
 		stx m_numberOfValidRows
@@ -859,6 +893,7 @@ Exit
 ;*****	Loop till max enemies
 ;
 ClearLoop
+
 		jsr VillianClear		
 		inx
 		cpx #MAX_VILLIANS
@@ -872,6 +907,7 @@ ClearLoop
 ;*****	Look at the level table for enemies
 ;
 Loop	
+
 		ldx m_hldX
 
 		ldy #$0									; column index
@@ -908,11 +944,11 @@ InitVillian
 
 		and #$0F								; reduce it to just the number		
 		tax										; get ready for the init method call
-		dex										
-
-		lda EnemyInitLSB,x						; the LSB of the method
+		stx m_villianTypeId
+		 
+		lda VillianInitLSB,x						; the LSB of the method
 		sta m_paramW01							; store to zero page
-		lda EnemyInitMSB,x						; the LSB of the method
+		lda VillianInitMSB,x						; the LSB of the method
 		sta m_paramW01+1						; store to zero page
 
 		lda m_ptrLevelLine						; the LSB of the method
@@ -929,12 +965,20 @@ InitVillian
 		lda m_hldX								; row index
 		sta m_param01							; set the parameter
 						
-		lda #>(CheckYLoop - 1)					; LSB for the set up stack to act like a JSR
+		lda #>(FinishInit - 1)					; LSB for the set up stack to act like a JSR
 		pha										; push a simulated return LSB address
-		lda #<(CheckYLoop - 1)					; MSB for the set up stack to act like a JSR 
+		lda #<(FinishInit - 1)					; MSB for the set up stack to act like a JSR 
 		pha										; push a simulated return MSB address	
 				
 		jmp (m_paramW01)						; issue the jump
+
+;*****	Init the type Id
+;
+FinishInit
+		
+		ldx m_villianCurrIndex
+		lda m_villianTypeId
+		sta VilTypeId,x
 
 ;*****	Increment and Check the column loop 
 ;
@@ -1163,6 +1207,112 @@ Exit
 
 ;
 ;**************************************************************************************************
+;	VillianSideMoveContained
+;**************************************************************************************************
+;
+.proc VillianSideMoveContained
+
+		ldx m_villianCurrIndex
+		cpx #$FF
+		bne CheckDirection
+		jmp Exit
+		
+CheckDirection
+
+		lda #$00
+		sta VilCollisionX,x
+		
+		lda VilDirectionX,x
+		
+		cmp #PSD_LEFT		
+		beq SetLeft	
+					
+		cmp #PSD_RIGHT
+		beq SetRight
+		
+SetRight
+						
+		ldx m_villianCurrIndex
+
+		lda #PSD_RIGHT
+		sta VilDirectionX,x
+		
+		jsr VillianGetFontChar		
+		lda m_charDef
+		and #01
+		cmp #CT_BLOCK
+		beq RightDir
+		
+		jmp SetLeft
+		
+RightDir
+
+		ldx m_villianCurrIndex
+		
+		lda #PSD_RIGHT
+		sta VilCollisionX,x
+		
+		lda #PSD_DOWN
+		sta VilCollisionY,x
+		
+		lda VilLevelLeftX_L1,x					; update player side position
+		clc
+		adc #$18	;VilSpeedX_L1,x
+		sta VilLevelLeftX_L1,x
+		
+		lda VilLevelLeftX_H1,x		
+		adc #$00
+		sta VilLevelLeftX_H1,x
+		
+		lda VilLevelLeftX_H2,x
+		adc #$00
+		jmp Exit	
+		
+SetLeft
+		
+		ldx m_villianCurrIndex
+		
+		lda #PSD_LEFT
+		sta VilDirectionX,x
+		
+		jsr VillianGetFontChar		
+		lda m_charDef
+		and #01
+		cmp #CT_BLOCK
+		beq LeftDir
+
+		jmp SetRight
+		
+LeftDir
+		
+		ldx m_villianCurrIndex
+		
+		lda #PSD_LEFT
+		sta VilCollisionX,x
+		
+		lda #PSD_DOWN
+		sta VilCollisionY,x		
+		
+		lda VilLevelLeftX_L1,x	
+		sec
+		sbc #$18	;VilSpeedX_L1,x
+		sta VilLevelLeftX_L1,x
+		
+		lda VilLevelLeftX_H1,x
+		sbc #$00
+		sta VilLevelLeftX_H1,x
+		
+		lda VilLevelLeftX_H2,x
+		sbc #$00
+		sta VilLevelLeftX_H2,x			
+Exit
+
+		rts
+		
+.endp
+
+;
+;**************************************************************************************************
 ; 	VillianSubstractDeaccelToSpeedX
 ;**************************************************************************************************
 ;
@@ -1277,7 +1427,6 @@ Exit
 		stx m_villianCurrIndex
 						
 Loop
-
 		ldx m_villianCurrIndex
 		lda VilActive,x
 		cmp #$01
@@ -1289,28 +1438,30 @@ PositionVillian
 		jsr VillianSetSpawnPos
 		jsr VillianSetScreenPos
 
-DrawVillian
-
-		ldx m_villianCurrIndex
-		lda EnemyDrawLSB,x
-		sta m_paramW00
-		lda EnemyDrawMSB,x
-		sta m_paramW00+1
-		
-		lda #>(NextVillian - 1)					; LSB for the set up stack to act like a JSR
-		pha										; push a simulated return LSB address
-		lda #<(NextVillian - 1)					; MSB for the set up stack to act like a JSR 
-		pha										; push a simulated return MSB address
-
-		jmp (m_paramW00)	
+;DrawVillian
+;
+;		ldx m_villianCurrIndex
+;		lda VillianAnimLSB,x
+;		sta m_paramW00
+;		lda VillianAnimMSB,x
+;		sta m_paramW00+1
+;		
+;		lda #>(NextVillian - 1)					; LSB for the set up stack to act like a JSR
+;		pha										; push a simulated return LSB address
+;		lda #<(NextVillian - 1)					; MSB for the set up stack to act like a JSR 
+;		pha										; push a simulated return MSB address
+;
+;		jmp (m_paramW00)	
 								
 NextVillian
 
 		ldx m_villianCurrIndex
 		inx
 		stx m_villianCurrIndex
+		
 		cpx #MAX_VILLIANS
 		beq Exit
+		
 		jmp Loop
 
 Exit
@@ -1332,16 +1483,20 @@ Exit
 		ldx #$00
 		stx m_villianCurrIndex
 		
-Loop
-	
+Loop	
 		ldx m_villianCurrIndex
+		
 		lda VilActive,x
 		cmp #$01
 		beq UpdateFrame
 		jmp NextEnemy		
 		
-UpdateFrame				
+UpdateFrame
 
+		sta wsync				
+
+		ldx m_villianCurrIndex
+		
 		inc VilCurrFrame,x
 		lda VilCurrFrame,x
 		cmp VilTotalFrame,x		
@@ -1350,13 +1505,14 @@ UpdateFrame
 		lda #$00
 		sta VilCurrFrame,x
 		
-EnemyMove
+EnemyMove		
 		
 		ldx m_villianCurrIndex
+		ldy VilTypeId,x
 		
-		lda EnemyMoveLSB,x
+		lda VillianMoveLSB,y
 		sta m_paramW00
-		lda EnemyMoveMSB,x
+		lda VillianMoveMSB,y
 		sta m_paramW00+1
 		
 		lda #>(DrawEnemy - 1)
@@ -1369,11 +1525,11 @@ EnemyMove
 DrawEnemy
 
 		ldx m_villianCurrIndex
+		ldy VilTypeId,x
 		
-		lda EnemyDrawLSB,x
+		lda VillianAnimLSB,y
 		sta m_paramW00
-
-		lda EnemyDrawMSB,x
+		lda VillianAnimMSB,y
 		sta m_paramW00+1
 		
 		lda #>(NextEnemy - 1)
