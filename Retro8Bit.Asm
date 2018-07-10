@@ -159,8 +159,8 @@ RetroLoop
 
 ;*****	Start Game Play Setup
 ;
-		;lda #$00								; Turn off screen related functions	
-		;sta SDMCTL								; store it
+		lda #$00								; Turn off screen related functions	
+		sta SDMCTL								; store it
 
 ;*****	Memory Settings
 ;
@@ -228,32 +228,6 @@ RetroLoop
 		
 		jsr InitPlatforms
 		jsr InitObjectCounters
-		
-;		ldy #$08
-;		ldx #$00
-;				
-;SeedVillians
-;		
-;		stx m_villianCurrIndex	
-;		lda VilActive,x
-;		cmp #$01
-;		bne IncX
-;		 
-;		sty m_saveRegY 	
-;		jsr VilliansUpdate
-;		ldy m_saveRegY
-;
-;IncX		
-;		
-;		inx
-;		cpx #MAX_VILLIANS
-;		bne IncY
-;		
-;		ldx #$00		
-;IncY		
-;
-;		dey
-;		bpl SeedVillians
 		
 		VcountWait 120
 		
@@ -357,7 +331,6 @@ PlayerMethodReturn
 ;
 PlayerNormalStates
 
-		;jsr UpdateCameraWindow
 		jsr SetPlayerScreenPos
 		jsr DrawPlayer
 			
@@ -380,18 +353,15 @@ MissilesStep
 ;
 GameAnimations
 
-		;jsr SfxUpdate
 		
 		jsr AnimatePlatformH		
 		jsr DoFontAnimations
 		jsr UpdateCoinAnimations
-		jsr UpdateInfoLine
 		
 				
 		VcountWait 120
 
 		jsr CheckPMCollisions				
-		jsr DebugInfo
 		
 		lda m_disableGameTimer	
 		bne Exit		
@@ -406,14 +376,11 @@ PlayerEndStates
 		and #$0F
 		sta m_sfxEffect
 
-		;jsr SfxUpdate
 		jsr AnimatePlatformH		
 		jsr DrawPlayerExplosion
 		jsr DoFontAnimations
 		jsr UpdateCoinAnimations
 		jsr DrawEnemyExplosion
-		jsr UpdateInfoLine
-		jsr DebugInfo				
 
 		VcountWait 120
 
@@ -429,12 +396,18 @@ Exit
 		rts		
 .endp
 
-
+;
+;**************************************************************************************************
+; 	VBI - Vertical Blank Interrupt
+;**************************************************************************************************
+;
 VBI		
 		lda #[NMI_DLI + NMI_VBI]				; enable DLI's	
 		sta NMIEN								; store it
 		
 		jsr SfxUpdate
+		jsr UpdateInfoLine
+		jsr DebugInfo				
 		
 		jmp XITVB		
 
@@ -515,7 +488,7 @@ Loop
 ;
 ENDOFCODE
 .PRINT "End of Code: ", ENDOFCODE
-.if ENDOFCODE > $9FFF
+.if ENDOFCODE > DataAddress
 	.error "Code exceeds alloted area!"
 .endif		
 
@@ -575,7 +548,9 @@ ENDOFCODE
 		.rept [$1000 - [LEVEL_CHAR_SIZE_Y*LEVEL_CHAR_SIZE_X]]
 			.byte $00
 		.endr
-		:LEVEL_CHAR_SIZE_X .byte $61			; add additional line at end to insure no miscalcs on laddres, hazards, etc....
+		
+		; add additional line at end to insure no miscalcs on laddres, hazards, etc....
+		:LEVEL_CHAR_SIZE_X .byte $61			
 
 ;
 ;**************************************************************************************************
