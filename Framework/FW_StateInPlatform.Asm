@@ -1,5 +1,17 @@
+;
+;***************************************************************************************************
+;
+;	Filename:		FW_StateInPlatform.Asm
+;
+;	Modified On:	Thur Apr 26, 2018 01:12 PM
+;
+;	Comments:		Portions of this code taken from NRV's OPEN_PLAT project and
+;					Ken Jennings C64 to Atari MLP and also from WUDSN Tutorials.
+;				
+;***************************************************************************************************
+;
 
-PlayerMethodOverPlatform
+.proc PlayerMethodOverPlatform
 
 	jsr CheckCollectable
 	jsr CheckCreatePlayerMissile
@@ -167,4 +179,9 @@ PMGT_snap_ladder_down
 ;----------------------------------------
 PMGT_end
 	jsr SetPlayerInfo
-	jmp PlayLevel.PlayerMethodReturn
+	
+;	jmp PlayLevel.PlayerMethodReturn
+
+	rts
+	
+.endp

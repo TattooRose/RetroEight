@@ -85,7 +85,7 @@ PAL_VERSION					= 0
 
 NUM_OF_LIVES				= 5
 
-MAX_ROWS					= 40
+MAX_ROWS					= 24
 
 CHAR_PIXELS_X				= 4
 CHAR_PIXELS_Y				= 8
@@ -119,10 +119,10 @@ DMACTL_OPTIONS				= [ENABLE_DL_DMA 	| PLAYFIELD_WIDTH_NORMAL_MASK 	| ENABLE_PM_D
 ;
 InitSystem
 
-		lda PAL									; only run in the correct system
+		lda PAL									; PAL or NTSC TV Display
 		and #14
 
-.if PAL_VERSION = 1								; PAL or NTSC TV Display
+.if PAL_VERSION = 1								; only run in the correct system
 
 No_Pal_Loop
 		bne No_Pal_Loop
@@ -133,15 +133,16 @@ No_Ntsc_Loop
 		beq No_Ntsc_Loop
 
 .endif
+		
 		ClearSystem								; begin machine setup
 		DisableBasic							; disable basic to use memory
 		
 		SetRamTop #32							; Set Ramtop less 8K
 
-		lda #$00
-		sta m_currLevelNum						; grab the current level number
+		lda #$00								; set the starting level number
+		sta m_currLevelNum						; store it
 
-		jsr InitGameLevel						; init the game play levle
+		jsr InitGameLevel						; init the game play level
 
 ;*****	Retro Game Loop
 ;
@@ -180,9 +181,9 @@ RetroLoop
 		jsr LoadDisplayListData					; perform the DL data move
 
 		SetDisplayListInterrupt GameDli_01		; set the display list interrupts
-		VcountWait 120
+		SetVerticalBlank VBI $06				; set the vertical blank interrupt
 
-		SetVerticalBlank VBI $06
+		VcountWait 120							; make sure to wait so the setting takes effect
 		
 ;*****	Display List, Font, PM addresses
 ;		
@@ -200,8 +201,7 @@ RetroLoop
 ;*****	Level Table Initialization
 ;
 		lda #<GameMemoryAddress
-		sta m_currentLineAddress
-	
+		sta m_currentLineAddress	
 		lda #>GameMemoryAddress
 		sta m_currentLineAddress+1
 		
@@ -215,21 +215,21 @@ RetroLoop
 		jsr InitPlayer
 		jsr SetSpawnPos
 		
-		VCountWait 120
+		VCountWait 120							; make sure to wait so the setting takes effect
 				
 		
 ;*****	Initalize Level Components
 ;
-		jsr VillianSystemInit		
-		jsr VilliansInit
+		jsr VillianSystemInit					; initialize Villian system		
+		jsr VilliansInit						; initialize Villians
 		
-		jsr InitEnemyManager
-		jsr InitMissileSystem
+		jsr InitEnemyManager					; initialize Enemies (lasers, missile launchers, etc...)
+		jsr InitMissileSystem					; initialize the missile system
 		
-		jsr InitPlatforms
-		jsr InitObjectCounters
+		jsr InitPlatforms						; initialize the floating platforms
+		jsr InitObjectCounters					; count the coins, launchers, lasers, etc...
 		
-		VcountWait 120
+		VcountWait 120							; make sure to wait so the setting takes effect
 		
 ;*****	Initialize the Hardware
 ;
@@ -250,10 +250,9 @@ RetroLoop
 
 		lda #GRACTL_OPTIONS						; apply GRACTL options
 		sta GRACTL								; store it
-;
+
 		lda #PRIOR_OPTIONS						; apply PRIOR options
 		sta PRIOR								; store it
-;
 
 		lda #[NMI_DLI + NMI_VBI]				; enable DLI's	
 		sta NMIEN								; store it
@@ -317,6 +316,12 @@ CheckUserInput
 
 		jsr CheckInput
 		jsr UpdateTimers
+		
+		lda #>(PlayerMethodReturn - 1)
+		pha
+		lda #<(PlayerMethodReturn - 1)
+		pha
+		
 		jmp (m_playerMethodPointer)
 	
 ;*****	PlayerMethodReturn
@@ -340,8 +345,8 @@ EnemyUpdate
 
 		jsr UpdateMissileSystem
 		jsr UpdateEnemyManager
-		jsr VilliansUpdate
 		
+		jsr VilliansUpdate		
 		
 ;*****	MissilesStep
 ;
@@ -352,12 +357,10 @@ MissilesStep
 ;*****	GameAnimations
 ;
 GameAnimations
-
 		
 		jsr AnimatePlatformH		
 		jsr DoFontAnimations
-		jsr UpdateCoinAnimations
-		
+		jsr UpdateCoinAnimations		
 				
 		VcountWait 120
 
@@ -405,11 +408,11 @@ VBI
 		lda #[NMI_DLI + NMI_VBI]				; enable DLI's	
 		sta NMIEN								; store it
 		
-		jsr SfxUpdate
-		jsr UpdateInfoLine
-		jsr DebugInfo				
+		jsr SfxUpdate							; update music and sounds
+		jsr UpdateInfoLine						; update the heads up display information
+		jsr DebugInfo							; show any debug info
 		
-		jmp XITVB		
+		jmp XITVB								; Exit Vertical Blank
 
 ;
 ;**************************************************************************************************

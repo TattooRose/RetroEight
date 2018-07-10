@@ -1,5 +1,16 @@
-
-PlayerMethodInWater
+;
+;***************************************************************************************************
+;
+;	Filename:		FW_StateInWater.Asm
+;
+;	Modified On:	Thur Apr 26, 2018 01:12 PM
+;
+;	Comments:		Portions of this code taken from NRV's OPEN_PLAT project and
+;					Ken Jennings C64 to Atari MLP and also from WUDSN Tutorials.
+;				
+;***************************************************************************************************
+;	
+.proc PlayerMethodInWater
 
 	;jsr CheckCollectable		; add collectables in water for this
 	
@@ -216,4 +227,8 @@ PMIW_update_pos
 
 
 PMIW_exit
-		jmp PlayLevel.PlayerMethodReturn
+
+;		jmp PlayLevel.PlayerMethodReturn
+		rts
+
+.endp

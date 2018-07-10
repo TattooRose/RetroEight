@@ -1,5 +1,17 @@
+;
+;***************************************************************************************************
+;
+;	Filename:		FW_StateJumping.Asm
+;
+;	Modified On:	Thur Apr 26, 2018 01:12 PM
+;
+;	Comments:		Portions of this code taken from NRV's OPEN_PLAT project and
+;					Ken Jennings C64 to Atari MLP and also from WUDSN Tutorials.
+;				
+;***************************************************************************************************
+;	
 
-PlayerMethodJumping
+.proc PlayerMethodJumping
 
 	jsr CheckCollectable
 
@@ -95,4 +107,9 @@ PMJ_hold_jump_speed
 	jsr SetPlayerMethod
 
 PMJ_exit
-		jmp PlayLevel.PlayerMethodReturn
+
+;		jmp PlayLevel.PlayerMethodReturn
+		rts
+		
+.endp
+

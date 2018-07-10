@@ -1,7 +1,7 @@
 ;
 ;***************************************************************************************************
 ;
-;	Filename:		PlayerStates.Asm
+;	Filename:		FW_PlayerStates.Asm
 ;
 ;	Modified On:	Thur Apr 26, 2018 01:12 PM
 ;
@@ -14,42 +14,44 @@
 ; Local Storage
 ;**************************************************************************************************
 ;
-TabPlayerMethodColor
+
 .if PAL_VERSION = 0
-	.byte 10, 11*16+10, 9*16+10, 9*16+10, 1*16+12, 7*16+8, 4, 2*16+6
+
+TabPlayerMethodColor	.byte 10, 11*16+10, 9*16+10, 9*16+10, 1*16+12, 7*16+8, 4, 2*16+6	
+
 .else
-	.byte 10, 10*16+10, 8*16+10, 8*16+10, 15*16+12, 7*16+8, 4, 1*16+6
+
+TabPlayerMethodColor	.byte 10, 10*16+10, 8*16+10, 8*16+10, 15*16+12, 7*16+8, 4, 1*16+6
+
 .endif
 
-TabPlayerMethodLSB
-	.byte <PlayerMethodStatic, <PlayerMethodOverPlatform
-	.byte <PlayerMethodJumping, <PlayerMethodFalling
-	.byte <PlayerMethodClimbing, <PlayerMethodInWater
-	.byte <PlayerMethodGravityTest, <PlayerMethodLose
+TabPlayerMethodLSB		.byte <PlayerMethodStatic, <PlayerMethodOverPlatform
+						.byte <PlayerMethodJumping, <PlayerMethodFalling
+						.byte <PlayerMethodClimbing, <PlayerMethodInWater
+						.byte <PlayerMethodGravityTest, <PlayerMethodLose
 
-TabPlayerMethodMSB
-	.byte >PlayerMethodStatic, >PlayerMethodOverPlatform
-	.byte >PlayerMethodJumping, >PlayerMethodFalling
-	.byte >PlayerMethodClimbing, >PlayerMethodInWater
-	.byte >PlayerMethodGravityTest, >PlayerMethodLose
+TabPlayerMethodMSB		.byte >PlayerMethodStatic, >PlayerMethodOverPlatform
+						.byte >PlayerMethodJumping, >PlayerMethodFalling
+						.byte >PlayerMethodClimbing, >PlayerMethodInWater
+						.byte >PlayerMethodGravityTest, >PlayerMethodLose
 
-TabPlayerMethodInitLSB
-	.byte <PlayerMethodInitStatic, <PlayerMethodInitOverPlatform
-	.byte <PlayerMethodInitJumping, <PlayerMethodInitFalling
-	.byte <PlayerMethodInitClimbing, <PlayerMethodInitInWater
-	.byte <PlayerMethodInitGravityTest, <PlayerMethodInitLose
+TabPlayerMethodInitLSB	.byte <PlayerMethodInitStatic, <PlayerMethodInitOverPlatform
+						.byte <PlayerMethodInitJumping, <PlayerMethodInitFalling
+						.byte <PlayerMethodInitClimbing, <PlayerMethodInitInWater
+						.byte <PlayerMethodInitGravityTest, <PlayerMethodInitLose
 
-TabPlayerMethodInitMSB
-	.byte >PlayerMethodInitStatic, >PlayerMethodInitOverPlatform
-	.byte >PlayerMethodInitJumping, >PlayerMethodInitFalling
-	.byte >PlayerMethodInitClimbing, >PlayerMethodInitInWater
-	.byte >PlayerMethodInitGravityTest, >PlayerMethodInitLose
+TabPlayerMethodInitMSB	.byte >PlayerMethodInitStatic, >PlayerMethodInitOverPlatform
+						.byte >PlayerMethodInitJumping, >PlayerMethodInitFalling
+						.byte >PlayerMethodInitClimbing, >PlayerMethodInitInWater
+						.byte >PlayerMethodInitGravityTest, >PlayerMethodInitLose
+
 ;
 ;**************************************************************************************************
 ; SetPlayerMethod
 ;**************************************************************************************************
 ;
-SetPlayerMethod
+.proc SetPlayerMethod
+
 	stx m_playerState
 	
 	lda TabPlayerMethodLSB,x
@@ -64,20 +66,26 @@ SetPlayerMethod
 	lda TabPlayerMethodInitMSB,x
 	sta m_pageZeroTempPointer+1
 	
+	lda #>(Exit -1)
+	pha
+	lda #<(Exit -1)
+	pha
+	
 	jmp (m_pageZeroTempPointer)
-;
-;**************************************************************************************************
-; PlayerMethodInitStatic
-;**************************************************************************************************
-;
-PlayerMethodInitStatic
+
+Exit
+	
 	rts
+	
+.endp	
+
 ;
 ;**************************************************************************************************
 ; PlayerMethodInitOverPlatform
 ;**************************************************************************************************
 ;
-PlayerMethodInitOverPlatform
+.proc PlayerMethodInitOverPlatform
+
 	lda #0										; clear player speed in Y
 	sta m_playerSpeedY_H1
 	sta m_playerSpeedY_L1
@@ -97,12 +105,15 @@ PlayerMethodInitOverPlatform
 	lda #SIDE_DEACCEL_LAND_L1
 	sta m_playerSideDeaccel_L1
 	rts
+	
+.endp
+	
 ;
 ;**************************************************************************************************
 ; PlayerMethodInitJumping
 ;**************************************************************************************************
 ;
-PlayerMethodInitJumping
+.proc PlayerMethodInitJumping
 
 	lda #JUMP_HOLD_FRAMES						; hold jump for this number of frames, if the button is still pressed
 	sta m_playerHoldJumpCounter
@@ -127,12 +138,15 @@ PlayerMethodInitJumping
 	lda #SIDE_DEACCEL_AIR_L1
 	sta m_playerSideDeaccel_L1
 	rts
+
+.endp
+	
 ;
 ;**************************************************************************************************
 ; PlayerMethodInitFalling
 ;**************************************************************************************************
 ;
-PlayerMethodInitFalling
+.proc PlayerMethodInitFalling
 
 	lda #SIDE_SPEED_AIR_H1						; init max side speed
 	sta m_playerMaxSideSpeed_H1
@@ -150,12 +164,15 @@ PlayerMethodInitFalling
 	sta m_playerSideDeaccel_L1
 
 	rts
+	
+.endp
+	
 ;
 ;**************************************************************************************************
 ; PlayerMethodInitClimbing
 ;**************************************************************************************************
 ;
-PlayerMethodInitClimbing
+.proc PlayerMethodInitClimbing
 
 	lda #0										; clear player speed in X and Y
 	sta m_playerSideSpeed_H1
@@ -164,12 +181,15 @@ PlayerMethodInitClimbing
 	sta m_playerSpeedY_L1
 
 	rts
+
+.endp
+	
 ;
 ;**************************************************************************************************
 ; PlayerMethodInitInWater
 ;**************************************************************************************************
 ;
-PlayerMethodInitInWater
+.proc PlayerMethodInitInWater
 
 	lda #1										; set starting direction going down (0 = going up, 1 = going down)
 	sta m_waterPlayerDirectionFlag
@@ -202,36 +222,9 @@ PlayerMethodInitInWater
 	sta m_playerNoJumpTimer
 	
 	rts
-;
-;**************************************************************************************************
-; PlayerMethodInitGravityTest
-;**************************************************************************************************
-;
-PlayerMethodInitGravityTest
-	rts
-;
-;**************************************************************************************************
-; PlayerMethodInitLose
-;**************************************************************************************************
-;
-PlayerMethodInitLose
-	lda m_playerScreenTopY
-	sta m_playerExplosionScreenTopY_H1
-	lda #0
-	sta m_playerExplosionScreenTopY_L1
-
-	lda #1
-	sta m_playerExplosionStep
-
-	rts
-;
-;**************************************************************************************************
-; PlayerMethodInitLose
-;**************************************************************************************************
-;
-PlayerMethodStatic
-	jmp PlayLevel.PlayerMethodReturn
-
+	
+.endp
+	
 ;
 ;**************************************************************************************************
 ;
@@ -298,6 +291,7 @@ DecrementHealth
 ;*****	Start Animation
 ;
 CC_start_animation								; erase the collectable with the correct animation
+
 	lda m_ptrLevelLine
 	clc
 	adc m_middleBottomCharPosX
@@ -321,7 +315,7 @@ CC_exit
 ; DoSideMovement
 ;**************************************************************************************************
 ;
-DoSideMovement
+.proc DoSideMovement
 
 	lda m_stick0
 	and #[STICK_RIGHT | STICK_LEFT]
@@ -402,13 +396,17 @@ DSM_move_to_left
 ;**************************************************
 ;
 DSM_exit
+
 	rts
+	
+.endp
+	
 ;
 ;**************************************************************************************************
 ; DoSideControl
 ;**************************************************************************************************
 ;
-DoSideControl
+.proc DoSideControl
 
 	lda m_stick0
 	and #[STICK_RIGHT | STICK_LEFT]
@@ -486,6 +484,9 @@ DSC_check_left
 ;
 DSC_exit
 	rts
+
+.endp
+
 ;
 ;**************************************************************************************************
 ; Include Files
@@ -496,19 +497,82 @@ DSC_exit
 	icl "Framework/FW_StateFalling.Asm"
 	icl "Framework/FW_StateClimbing.Asm"
 	icl "Framework/FW_StateInWater.Asm"
-;	
+
+;
 ;**************************************************************************************************
+; PlayerMethodInitStatic
+;**************************************************************************************************
+;
+.proc PlayerMethodInitStatic
+
+	rts
+	
+.endp	
+
+;
+;**************************************************************************************************
+; PlayerMethodInitLose
+;**************************************************************************************************
+;
+.proc PlayerMethodStatic
+
+;	jmp PlayLevel.PlayerMethodReturn
+
+	rts
+
+.endp
+
+;
+;**************************************************************************************************
+; PlayerMethodInitGravityTest
+;**************************************************************************************************
+;
+.proc PlayerMethodInitGravityTest
+
+	rts
+
+.endp
+	
 ;
 ;**************************************************************************************************
 ; PlayerMethodGravityTest
 ;**************************************************************************************************
 ;
-PlayerMethodGravityTest
-	jmp PlayLevel.PlayerMethodReturn
+.proc PlayerMethodGravityTest
+
+;	jmp PlayLevel.PlayerMethodReturn
+		rts
+
+.endp
+
+;
+;**************************************************************************************************
+; PlayerMethodInitLose
+;**************************************************************************************************
+;
+.proc PlayerMethodInitLose
+
+	lda m_playerScreenTopY
+	sta m_playerExplosionScreenTopY_H1
+	lda #0
+	sta m_playerExplosionScreenTopY_L1
+
+	lda #1
+	sta m_playerExplosionStep
+
+	rts
+
+.endp
+	
 ;
 ;**************************************************************************************************
 ; PlayerMethodLose
 ;**************************************************************************************************
 ;
-PlayerMethodLose
-	jmp PlayLevel.PlayerMethodReturn
+.proc PlayerMethodLose
+
+;	jmp PlayLevel.PlayerMethodReturn
+
+	rts
+	
+.endp	
